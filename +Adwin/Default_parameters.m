@@ -191,7 +191,7 @@ classdef Default_parameters
             ,'3 : Imaging AOM freq'...      % Ana 3
             ,'4 : MOT AOM eff'...           % Ana 4
             ,'5 : Imaging AOM eff'...       % Ana 5
-            ,'Ana 6'...                % Ana 6
+            ,'6 : MOT EOM freq'...          % Ana 6
             ,'Ana 7'...                % Ana 7
             ,'Ana 8'...                % Ana 8
             ,'Ana 9'...                % Ana 9
@@ -205,12 +205,12 @@ classdef Default_parameters
             };
         
         ana_out_init = {...
-             295.3 ...                % Ana 1
-            ,307 ...                % Ana 2
-            ,287.3 ...                % Ana 3
+             295.3 ...            % Ana 1
+            ,307 ...              % Ana 2
+            ,287.3 ...            % Ana 3
             ,1 ...                % Ana 4
             ,1 ...                % Ana 5
-            ,0 ...                % Ana 6
+            ,1.71 ...             % Ana 6
             ,0 ...                % Ana 7
             ,0 ...                % Ana 8
             ,0 ...                % Ana 9

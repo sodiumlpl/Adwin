@@ -23,7 +23,7 @@ test_adwin.block_seq_array(1).parent_adwin = test_adwin;
 
 %%%% Digital : 1 : AOM Zeeman %%%%
 
-test_adwin.chge_state_dig(1,'test',[],'t0-DelayShutter');
+test_adwin.chge_state_dig(1,'test',[],'t0-DelayShutter+DelayZeemanPulse');
 
 test_adwin.chge_state_dig(1,'test',1,'DelayShutter');
 
@@ -65,7 +65,7 @@ test_adwin.chge_state_dig(3,'test',1,'ImagBlockDur');
 
 %%%% Digital : 4 : Zeeman Shutter %%%%
 
-test_adwin.chge_state_dig(4,'test',[],'t0-DelayShutter');
+test_adwin.chge_state_dig(4,'test',[],'t0-DelayShutter+DelayZeemanPulse');
 
 test_adwin.chge_state_dig(4,'test',1,'DelayShutter+PulseZeeman');
 
