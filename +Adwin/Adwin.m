@@ -2047,13 +2047,13 @@ classdef Adwin < handle
                     
                 end
                 
-                if isequal(obj.dig_out_init(32),1)
+                if isequal(obj.dig_out_init{32},1)
                     
                     adw_out=adw_out-2^31;
                     
                 end
                 
-                SetData_Double(2,adw_out,1);
+                SetData_Double(2,int32(adw_out),1);
                 
                 Start_Process(1);
                 
@@ -2224,6 +2224,8 @@ classdef Adwin < handle
                     copyfile('auto_parameters_script.m',scan_dir);
                     copyfile('dependent_parameters_script.m',scan_dir);
                     
+                    copyfile('+Adwin\Default_parameters.m',scan_dir);
+                    
                     %%% end scan
                     
                     if obj.scan_loop == obj.scan_end
@@ -2342,6 +2344,8 @@ classdef Adwin < handle
                     copyfile('auto_script.m',sc_dir);
                     copyfile('auto_parameters_script.m',sc_dir);
                     copyfile('dependent_parameters_script.m',sc_dir);
+                    
+                    copyfile('+Adwin\Default_parameters.m',sc_dir);
                     
                 end
                 
@@ -2820,6 +2824,24 @@ classdef Adwin < handle
         end
         
         function amg_but2_3_clb(obj,~,~)
+            
+            % ask from which folder to load the sequence
+            
+            path = uigetdir([Adwin.Default_parameters.root_path,'sequence_manager']);
+            
+            if ~strcmp(path,[Adwin.Default_parameters.root_path,'sequence_manager'])
+                
+                copyfile([path,'\auto_parameters_script.m'],[Adwin.Default_parameters.root_path,'sequence_manager\auto_parameters_script.m']);
+                copyfile([path,'\dependent_parameters_script.m'],[Adwin.Default_parameters.root_path,'sequence_manager\dependent_parameters_script.m']);
+                copyfile([path,'\auto_script.m'],[Adwin.Default_parameters.root_path,'sequence_manager\auto_script.m']);
+                
+                if exist([path,'\Default_parameters.m'],'file')
+                    
+                    copyfile([path,'\Default_parameters.m'],[Adwin.Default_parameters.root_path,'sequence_manager\+Adwin\Default_parameters.m']);
+                    
+                end
+                
+            end
             
             % reinitialize the parameters cell arrays
             

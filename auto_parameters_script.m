@@ -70,7 +70,7 @@ ZeemanOff=1000;
 
 test_adwin.st_params_cell{17}='cnt';
 
-cnt=2;
+cnt=1;
 
 test_adwin.st_params_cell{18}='t0';
 

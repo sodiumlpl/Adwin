@@ -44,6 +44,12 @@ classdef Block < handle
         
     end
     
+    properties % Show
+       
+        dig_out_show
+        
+    end
+    
     methods
         
         function obj = Block ()
@@ -87,25 +93,25 @@ classdef Block < handle
             timings_array_init=cell(1,Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr);
             
             for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr;
-            
-            timings_array_init{i} = Adwin.Timing;
-            
-            timings_array_init{i}.type = 'analog';
-            
-            timings_array_init{i}.parent_block = obj;
-            
-            timings_array_init{i}.formula = 'Inf';
-            
-            timings_array_init{i}.abs_out = Inf;
-            
-            timings_array_init{i}.out = Inf;
-            
-            timings_array_init{i}.ord = 1;
-            
-            timings_array_init{i}.out_nbr = i;
-            
-            timings_array_init{i}.timing_nbr = 1;
-            
+                
+                timings_array_init{i} = Adwin.Timing;
+                
+                timings_array_init{i}.type = 'analog';
+                
+                timings_array_init{i}.parent_block = obj;
+                
+                timings_array_init{i}.formula = 'Inf';
+                
+                timings_array_init{i}.abs_out = Inf;
+                
+                timings_array_init{i}.out = Inf;
+                
+                timings_array_init{i}.ord = 1;
+                
+                timings_array_init{i}.out_nbr = i;
+                
+                timings_array_init{i}.timing_nbr = 1;
+                
             end
             
             % Voltage array
@@ -113,25 +119,27 @@ classdef Block < handle
             voltages_array_init=cell(1,Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr);
             
             for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr;
-            
-            voltages_array_init{i} = Adwin.Voltage;
-            
-            voltages_array_init{i}.parent_block = obj;
-            
-            voltages_array_init{i}.out_nbr = i;
-            
-            voltages_array_init{i}.value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
-            
-            voltages_array_init{i}.behaviour = 'C';
-            
-            voltages_array_init{i}.voltage_nbr = 1;
-
+                
+                voltages_array_init{i} = Adwin.Voltage;
+                
+                voltages_array_init{i}.parent_block = obj;
+                
+                voltages_array_init{i}.out_nbr = i;
+                
+                voltages_array_init{i}.value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
+                
+                voltages_array_init{i}.behaviour = 'C';
+                
+                voltages_array_init{i}.voltage_nbr = 1;
+                
             end
             
             obj.ana_out_struct = struct('name'           ,Adwin.Default_parameters.ana_out_name ...
-                                       ,'timings_array'  ,timings_array_init ...
-                                       ,'voltages_array' ,voltages_array_init ...
-                                       );
+                ,'timings_array'  ,timings_array_init ...
+                ,'voltages_array' ,voltages_array_init ...
+                );
+            
+            obj.dig_out_show = zeros(1,Adwin.Default_parameters.dig_out_nbr);
             
         end
         
@@ -193,11 +201,28 @@ classdef Block < handle
                         ',''Position''           ,[c_ofs r_ofs+(i-1)*(r_wth+r_ofs) c_wth r_wth]', ...
                         ');']);
                     
+                    % Checkbox geometry
+                    
+                    c_wth = 0.013;
+                    c_ofs = 0.0025;
+                    r_wth = 0.6;
+                    r_ofs = 0.2;
+                    
+                    eval(['obj.bsg.ckb_',num2str(i),' = uicontrol(', ...
+                        '''Parent''                ,obj.bsg.hsp2_',num2str(i), ...
+                        ',''Style''                ,''checkbox''', ...
+                        ',''Units''                ,Adwin.Default_parameters.Checkbox_Units', ...
+                        ',''Value''                ,obj.dig_out_show(',num2str(i),')', ...
+                        ',''Position''             ,[c_ofs r_ofs c_wth r_wth]', ...
+                        ',''Tag''                 ,','''tag_',num2str(i),'''', ...
+                        ',''Callback''             ,@obj.bsg_ckb_i_clb', ...
+                        ');']);
+                    
                     % Digital outputs name geometry
                     
                     c_wth = 0.11;
                     r_wth = 0.6;
-                    c_ofs = 0.0025;
+                    c_ofs = 0.02;
                     r_ofs = 0.2;
                     
                     eval(['obj.bsg.txt_',num2str(i),' = uicontrol(', ...
@@ -218,7 +243,7 @@ classdef Block < handle
                         
                         % Digital outputs hsp2_i_j panels geometry
                         
-                        c_start_ofs = 0.12;
+                        c_start_ofs = 0.13;
                         c_wth = 0.04;
                         r_wth = 0.995;
                         c_ofs = 0.0025;
@@ -268,6 +293,48 @@ classdef Block < handle
                     end
                     
                 end
+                
+                % panel hsp3 geometry
+                
+                c_ofs = 0.9;
+                r_ofs = 0.975;
+                c_wth = 0.05;
+                r_wth = 0.0225;
+                
+                obj.bsg.hsp3 = uipanel(...
+                    'Parent'              ,obj.bsg.h ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                % pushbutton 3_1 geometry
+            
+            c_ofs = 0.0025;
+            r_ofs = 0.0025;
+            c_wth = 0.995;
+            r_wth = 0.995;
+            
+            obj.bsg.but3_1 = uicontrol(...
+                'Parent'                ,obj.bsg.hsp3 ...
+                ,'Style'                ,'pushbutton' ...
+                ,'String'               ,'Show' ...
+                ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
+                ,'FontSize'             ,Adwin.Default_parameters.Pushbutton_FontSize ...
+                ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
+                ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
+                ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.bsg_but3_1_clb ...
+                );
                 
             end
             
@@ -478,6 +545,95 @@ classdef Block < handle
                 
             end
 
+        end
+        
+        function bsg_ckb_i_clb(obj,~,~)
+            
+            tag_txt=get(gcbo,'Tag');
+            
+            split_tag=regexp(tag_txt,'_','split');
+            
+            i=str2double(split_tag{2});
+            
+            obj.dig_out_show(i) = eval(['get(obj.bsg.ckb_',num2str(i),',''Value'');']);
+            
+        end
+        
+        function bsg_but3_1_clb(obj,~,~)
+            
+            h_dig = figure(...
+                 'Name'            ,'Digital Timings' ...
+                ,'NumberTitle'     ,'off' ...
+                ,'Position'        ,[8 48 1200 950] ...
+                );
+            
+            ax_dig = axes(...
+                 'Parent'           ,h_dig...
+                ,'NextPlot'         ,'Add'...
+                );
+            
+            cmap = colormap('lines');
+            
+            show_vec = find(obj.dig_out_show);
+            
+            len_show = length(show_vec);
+            
+            x_data = cell(1,len_show);
+            y_data = cell(1,len_show);
+            
+            tmp_end = 0;
+            cnt = 1;
+            
+            for l=show_vec
+                
+                tmp = [obj.dig_out_struct(l).timings_array.out];
+                
+                x_data{l} = zeros(1,2*length(tmp));
+                y_data{l} = zeros(1,2*length(tmp));
+                
+                y_data{l}(1) = obj.dig_out_struct(l).timings_array(1).state;
+                
+                for i=1:(length(tmp)-1)
+                    
+                    x_data{l}(2*i) = x_data{l}(2*i-1)+tmp(i);
+                    x_data{l}(2*i+1) = x_data{l}(2*i);
+                    
+                    y_data{l}(2*i) = y_data{l}(2*i-1);
+                    y_data{l}(2*i+1) = 1-y_data{l}(2*i);
+                    
+                end
+                
+                tmp_end = max(tmp_end,1.1*x_data{l}(end-1));
+                y_data{l}(end) = y_data{l}(end-1);
+                
+                y_data{l} = y_data{l} + 2*(cnt-1);
+                
+                cnt = cnt+1;
+                
+            end
+            
+            cnt = 1;
+            
+            for l=show_vec
+                
+                x_data{l}(end) = tmp_end;
+                
+                plot(ax_dig,x_data{l},y_data{l},'LineStyle','-','Color',cmap(2*l,:))
+                
+                plot(ax_dig,linspace(0,tmp_end,10),ones(1,10)*2*(cnt-1),'LineStyle',':','Color',cmap(2*l,:))
+                
+                plot(ax_dig,linspace(0,tmp_end,10),ones(1,10)*2*cnt-1,'LineStyle',':','Color',cmap(2*l,:))
+                
+                xlim([0 tmp_end])
+                ylim([0 2*len_show])
+                xlabel('Time [ms]')
+                ylabel('Digital Outputs States')
+                
+                cnt = cnt+1;
+                
+            end
+            
+            
         end
         
         function bsg_closereq(obj,~,~)
