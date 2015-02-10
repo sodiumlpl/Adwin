@@ -110,7 +110,7 @@ classdef Default_parameters
             ,'4 : Zeeman Shutter'...       % Out 4
             ,'5 : MOT Shutter'...          % Out 5
             ,'6 : Imaging Shutter'...      % Out 6
-            ,'Out 7'...                    % Out 7
+            ,'7 : Repumper Shutter'...     % Out 7
             ,'Out 8'...                    % Out 8
             ,'Out 9'...                    % Out 9
             ,'Out 10'...                   % Out 10
@@ -134,7 +134,7 @@ classdef Default_parameters
             ,'Out 28'...                   % Out 28
             ,'Out 29'...                   % Out 29
             ,'Out 30'...                   % Out 30
-            ,'Out 31'...                   % Out 31
+            ,'31 : AOM 200 MHz'...         % Out 31
             ,'32 : AOMs On'...             % Out 32
             };
         
@@ -169,7 +169,7 @@ classdef Default_parameters
             ,0 ...               % Out 28
             ,0 ...               % Out 29
             ,0 ...               % Out 30
-            ,0 ...               % Out 31
+            ,1 ...               % Out 31
             ,1 ...               % Out 32
             };
         
@@ -186,22 +186,22 @@ classdef Default_parameters
         ana_data_out_array = [4,6];
         
         ana_out_name = {...
-             '1 : Zeeman AOM freq'...       % Ana 1
-            ,'2 : MOT AOM freq'...          % Ana 2
-            ,'3 : Imaging AOM freq'...      % Ana 3
-            ,'4 : MOT AOM eff'...           % Ana 4
-            ,'5 : Imaging AOM eff'...       % Ana 5
-            ,'6 : MOT EOM freq'...          % Ana 6
-            ,'Ana 7'...                % Ana 7
-            ,'Ana 8'...                % Ana 8
-            ,'Ana 9'...                % Ana 9
-            ,'Ana 10'...               % Ana 10
-            ,'Ana 11'...               % Ana 11
-            ,'Ana 12'...               % Ana 12
-            ,'Ana 13'...               % Ana 13
-            ,'Ana 14'...               % Ana 14
-            ,'15 : Lock AOM eff'...    % Ana 15
-            ,'16 : Zeeman AOM eff'...  % Ana 16
+             '1 : Zeeman AOM freq [MHz]' ...       % Ana 1
+            ,'2 : MOT AOM freq [MHz]' ...          % Ana 2
+            ,'3 : Imaging AOM freq [MHz]' ...      % Ana 3
+            ,'4 : MOT AOM eff' ...                 % Ana 4
+            ,'5 : Imaging AOM eff' ...             % Ana 5
+            ,'6 : MOT EOM freq [GHz]' ...          % Ana 6
+            ,'7 : Repumper AOM freq [GHz]' ...     % Ana 7
+            ,'8 : Zeeman EOM freq [GHz]' ...       % Ana 8
+            ,'Ana 9'...                           % Ana 9
+            ,'Ana 10'...                          % Ana 10
+            ,'Ana 11'...                          % Ana 11
+            ,'Ana 12'...                          % Ana 12
+            ,'Ana 13'...                          % Ana 13
+            ,'Ana 14'...                          % Ana 14
+            ,'15 : Lock AOM eff'...               % Ana 15
+            ,'16 : Zeeman AOM eff'...             % Ana 16
             };
         
         ana_out_init = {...
@@ -211,8 +211,8 @@ classdef Default_parameters
             ,1 ...                % Ana 4
             ,1 ...                % Ana 5
             ,1.71 ...             % Ana 6
-            ,0 ...                % Ana 7
-            ,0 ...                % Ana 8
+            ,1.71 ...             % Ana 7
+            ,1.71 ...             % Ana 8
             ,0 ...                % Ana 9
             ,0 ...                % Ana 10
             ,0 ...                % Ana 11
@@ -246,7 +246,7 @@ classdef Default_parameters
         
         t_res = 0.01; % time resolution in [ms]
         
-        seq_duration = 3;   % sequence total duration
+        seq_duration = 5;   % sequence total duration
         
         pgb_duration = 0.1; % duration of each step of the progress bar
         

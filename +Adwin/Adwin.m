@@ -92,6 +92,14 @@ classdef Adwin < handle
         
     end
     
+    properties %Network
+       
+        net
+        
+        msg  % message containing some informations about the sequence
+        
+    end
+    
     methods
         
         function obj = Adwin ()
@@ -263,6 +271,10 @@ classdef Adwin < handle
                     obj.global_saved_count = 0;
                     
                 end
+                
+                % create Network class
+                
+                obj.net = Network.Network(obj);
                 
         end
         
@@ -2095,6 +2107,18 @@ classdef Adwin < handle
 
             if obj.running
                 
+                % send message pictures ready
+                
+                if ~isempty(obj.msg)
+                    
+                    obj.net.send_message('BEC009',obj.msg);
+                    
+                    obj.msg = [];
+                    
+                end
+                
+                % Stop Adwin process
+                
                 Stop_Process(2);
                 
                 disp('Stop Adwin sequence');
@@ -2226,13 +2250,11 @@ classdef Adwin < handle
                     
                     copyfile('+Adwin\Default_parameters.m',scan_dir);
                     
-                    %%% end scan
+                    obj.msg = ['scan_',num2str(obj.scan_count),'_pic_',num2str(obj.scan_loop)];
                     
                     if obj.scan_loop == obj.scan_end
                         
                         obj.scanning = 0;
-                        
-                        disp('End Scan')
                         
                     end
                     
@@ -2346,6 +2368,12 @@ classdef Adwin < handle
                     copyfile('dependent_parameters_script.m',sc_dir);
                     
                     copyfile('+Adwin\Default_parameters.m',sc_dir);
+                    
+                    obj.msg = ['seq_',num2str(obj.global_saved_count)];
+                    
+                else
+                    
+                    obj.msg = 'seq_0';
                     
                 end
                 
@@ -2778,9 +2806,24 @@ classdef Adwin < handle
         
         function adw_stop_fcn(obj,~,~)
             
+            %%%
+            
             Stop_Process(2);
             
             disp('!! Stop Adwin sequence !!');
+            
+            
+            % send message pictures ready
+            
+            if ~isempty(obj.msg)
+                
+                obj.net.send_message('BEC009',obj.msg);
+                
+                obj.msg = [];
+                
+            end
+
+            %%%
             
             Start_Process(1);
             
@@ -4360,6 +4403,32 @@ classdef Adwin < handle
                 set(obj.amg.txt5_1_2,'String',num2str(obj.global_saved_count));
                 
             end
+            
+        end
+        
+        function delete(obj)
+            
+            for i=1:length(obj.block_seq_array)
+                
+                for j=1:Adwin.Default_parameters.dig_out_nbr
+                    
+                    for k=1:length(obj.block_seq_array(i).dig_out_struct(j).timings_array)
+                        
+                        delete(obj.block_seq_array(i).dig_out_struct(j).timings_array(k));
+                        
+                    end
+                    
+                end
+                
+                delete(obj.block_seq_array(i));
+                
+            end
+            
+            delete(obj.adw_timer);
+            
+            delete(obj.pgb_timer);
+            
+            delete(obj.net);
             
         end
         
