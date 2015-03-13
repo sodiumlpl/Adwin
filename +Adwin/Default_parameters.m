@@ -7,6 +7,8 @@ classdef Default_parameters
         root_path = 'C:\Users\BEC\Documents\MATLAB\13_Adwin\';
         data_root_path = 'C:\Users\BEC\Documents\data\';
         
+        params_path = '\\TIBO-HP\Data\Tmp\';
+        
     end
     
     properties (Constant) % Defaults Panel properties
@@ -112,14 +114,14 @@ classdef Default_parameters
             ,'6 : Imaging Shutter'...      % Out 6
             ,'7 : Repumper Shutter'...     % Out 7
             ,'Out 8'...                    % Out 8
-            ,'Out 9'...                    % Out 9
+            ,'9 : Transport inhib 2'...    % Out 9
             ,'Out 10'...                   % Out 10
             ,'Out 11'...                   % Out 11
             ,'Out 12'...                   % Out 12
             ,'13 : Camera Trigger'...      % Out 13
             ,'Out 14'...                   % Out 14
             ,'Out 15'...                   % Out 15
-            ,'Out 16'...                   % Out 16
+            ,'16 : AOM 200 MHz'...         % Out 16
             ,'Out 17'...                   % Out 17
             ,'Out 18'...                   % Out 18
             ,'Out 19'...                   % Out 19
@@ -133,7 +135,7 @@ classdef Default_parameters
             ,'Out 27'...                   % Out 27
             ,'Out 28'...                   % Out 28
             ,'Out 29'...                   % Out 29
-            ,'Out 30'...                   % Out 30
+            ,'30 : Mechanical Shutter'...  % Out 30
             ,'31 : AOM 200 MHz'...         % Out 31
             ,'32 : AOMs On'...             % Out 32
             };
@@ -144,7 +146,7 @@ classdef Default_parameters
             ,1 ...                % Out 3
             ,0 ...                % Out 4
             ,0 ...                % Out 5
-            ,1 ...                % Out 6
+            ,0 ...                % Out 6
             ,0 ...                % Out 7
             ,0 ...                % Out 8
             ,0 ...                % Out 9
@@ -154,7 +156,7 @@ classdef Default_parameters
             ,0 ...               % Out 13
             ,0 ...               % Out 14
             ,0 ...               % Out 15
-            ,0 ...               % Out 16
+            ,1 ...               % Out 16
             ,0 ...               % Out 17
             ,0 ...               % Out 18
             ,0 ...               % Out 19
@@ -194,8 +196,8 @@ classdef Default_parameters
             ,'6 : MOT EOM freq [GHz]' ...          % Ana 6
             ,'7 : Repumper AOM freq [GHz]' ...     % Ana 7
             ,'8 : Zeeman EOM freq [GHz]' ...       % Ana 8
-            ,'Ana 9'...                           % Ana 9
-            ,'Ana 10'...                          % Ana 10
+            ,'9 : Repumper AOM amp'...             % Ana 9
+            ,'10 : Zeeman EOM amp'...              % Ana 10
             ,'Ana 11'...                          % Ana 11
             ,'Ana 12'...                          % Ana 12
             ,'Ana 13'...                          % Ana 13
@@ -213,8 +215,8 @@ classdef Default_parameters
             ,1.71 ...             % Ana 6
             ,1.71 ...             % Ana 7
             ,1.71 ...             % Ana 8
-            ,0 ...                % Ana 9
-            ,0 ...                % Ana 10
+            ,1 ...                % Ana 9
+            ,1 ...                % Ana 10
             ,0 ...                % Ana 11
             ,0 ...                % Ana 12
             ,0 ...                % Ana 13
@@ -246,9 +248,9 @@ classdef Default_parameters
         
         t_res = 0.01; % time resolution in [ms]
         
-        seq_duration = 5;   % sequence total duration
+        seq_duration = 12;   % sequence total duration
         
-        pgb_duration = 0.1; % duration of each step of the progress bar
+        pgb_duration = 1; % duration of each step of the progress bar
         
     end
     

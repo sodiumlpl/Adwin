@@ -2236,6 +2236,19 @@ classdef Block < handle
                     
                 end
                 
+                if ~strcmp(obj.ana_out_struct(i).voltages_array(end).value_formula,num2str(obj.ana_out_struct(i).voltages_array(end).value))
+                    
+                    if length(obj.ana_out_struct(i).timings_array)==1
+                        
+                        fprintf(fid,['%%%%%%%% Analog : ',Adwin.Default_parameters.ana_out_name{i},' %%%%%%%%\n\n']);
+                        
+                    end
+                    
+                    fprintf(fid,['test_adwin.chge_end_state_ana(',num2str(i),',''',obj.name,...
+                        ''',''',obj.ana_out_struct(i).voltages_array(end).value_formula,''');\n\n']);
+                    
+                end
+                
             end
             
         end

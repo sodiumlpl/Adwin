@@ -72,23 +72,9 @@ classdef Adwin < handle
         
         scan_count % number of scans during the day
         
-        global_saved_count % number of saved sequence of a day 
+        global_saved_count % number of saved sequence of a day
         
-    end
-    
-    properties % listeners list
-        
-        lst_seq_changed
-        
-        lst_scanning
-        
-        lst_scan_loop
-        
-        lst_scan_end
-        
-        lst_scan_count
-        
-        lst_global_saved_count
+        seq_duration = Adwin.Default_parameters.seq_duration;
         
     end
     
@@ -137,7 +123,7 @@ classdef Adwin < handle
                 );
             
             obj.adw_timer = timer(...
-                'Period'        ,Adwin.Default_parameters.seq_duration,...
+                'Period'        ,obj.seq_duration,...
                 'StopFcn'       ,@obj.adw_stop_fcn,...
                 'TimerFcn'      ,@obj.adw_timer_fcn,...
                 'ExecutionMode' ,'fixedSpacing'...
@@ -149,7 +135,7 @@ classdef Adwin < handle
                 'StopFcn'       ,@obj.pgb_timer_stp,...
                 'TimerFcn'      ,@obj.pgb_timer_fcn,...
                 'ExecutionMode' ,'fixedSpacing',...
-                'TasksToExecute',floor(Adwin.Default_parameters.seq_duration/Adwin.Default_parameters.pgb_duration) ...
+                'TasksToExecute',floor(obj.seq_duration/Adwin.Default_parameters.pgb_duration) ...
                 );
             
             % Initialize Adwin
@@ -171,17 +157,19 @@ classdef Adwin < handle
             
             % initialize listeners
             
-            obj.lst_seq_changed = addlistener(obj,'seq_changed','PostSet',@obj.postset_seq_changed);
+            addlistener(obj,'seq_changed','PostSet',@obj.postset_seq_changed);
             
-            obj.lst_scanning = addlistener(obj,'scanning','PostSet',@obj.postset_scanning);
+            addlistener(obj,'scanning','PostSet',@obj.postset_scanning);
             
-            obj.lst_scan_loop = addlistener(obj,'scan_loop','PostSet',@obj.postset_scan_loop);
+            addlistener(obj,'scan_loop','PostSet',@obj.postset_scan_loop);
             
-            obj.lst_scan_end = addlistener(obj,'scan_end','PostSet',@obj.postset_scan_end);
+            addlistener(obj,'scan_end','PostSet',@obj.postset_scan_end);
             
-            obj.lst_scan_count = addlistener(obj,'scan_count','PostSet',@obj.postset_scan_count);
+            addlistener(obj,'scan_count','PostSet',@obj.postset_scan_count);
             
-            obj.lst_global_saved_count = addlistener(obj,'global_saved_count','PostSet',@obj.postset_global_saved_count);
+            addlistener(obj,'global_saved_count','PostSet',@obj.postset_global_saved_count);
+            
+            addlistener(obj,'seq_duration','PostSet',@obj.postset_seq_duration);
             
             % set date and create date folder
             
@@ -1148,17 +1136,38 @@ classdef Adwin < handle
                 ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
                 );
             
-            % text txt5_1_8 geometry
+            % text edt5_1_1 geometry
             
             c_ofs = 0.01+0.2+0.01;
+            r_ofs = 0.285;
+            c_wth = 0.05;
+            r_wth = 0.2;
+            
+            obj.amg.edt5_1_1 = uicontrol(...
+                'Parent'                ,obj.amg.hsp5_1 ...
+                ,'Style'                ,'edit' ...
+                ,'String'               ,num2str(obj.seq_duration) ...
+                ,'Units'                ,Adwin.Default_parameters.Edit_Units ...
+                ,'FontName'             ,Adwin.Default_parameters.Edit_FontName ...
+                ,'FontSize'             ,Adwin.Default_parameters.Edit_FontSize ...
+                ,'FontUnits'            ,Adwin.Default_parameters.Edit_FontUnits ...
+                ,'FontWeight'           ,'normal' ...
+                ,'HorizontalAlignment'  ,Adwin.Default_parameters.Edit_HorizontalAlignment ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.amg_edt5_1_1_clb ...
+                );
+            
+            % text txt5_1_8 geometry
+            
+            c_ofs = 0.01+0.2+0.01+0.06;
             r_ofs = 0.25;
-            c_wth = 0.1;
+            c_wth = 0.02;
             r_wth = 0.2;
             
             obj.amg.txt5_1_8 = uicontrol(...
                 'Parent'                ,obj.amg.hsp5_1 ...
                 ,'Style'                ,'text' ...
-                ,'String'               ,[num2str(Adwin.Default_parameters.seq_duration),' s']  ...
+                ,'String'               ,'s'  ...
                 ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
                 ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
                 ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
@@ -1192,7 +1201,7 @@ classdef Adwin < handle
             
             c_ofs = 0.01+0.2+0.01;
             r_ofs = 0.;
-            c_wth = 0.1;
+            c_wth = 0.11;
             r_wth = 0.2;
             
             obj.amg.txt5_1_10 = uicontrol(...
@@ -2111,6 +2120,14 @@ classdef Adwin < handle
                 
                 if ~isempty(obj.msg)
                     
+                    % save parameters file
+                    
+                    [static_params,dep_params] = obj.get_params;
+                    
+                    save([Adwin.Default_parameters.params_path,'params.mat'],'static_params','dep_params');
+                    
+                    % send message to Data-Treatment computer
+                    
                     obj.net.send_message('BEC009',obj.msg);
                     
                     obj.msg = [];
@@ -2122,6 +2139,26 @@ classdef Adwin < handle
                 Stop_Process(2);
                 
                 disp('Stop Adwin sequence');
+                
+                % Reset Scan params if Scan ended
+                
+                if ~isempty(obj.scan_struct)
+                    
+                    if obj.scan_loop == obj.scan_end
+                        
+                        obj.scanning = 0;
+                        
+                        % reset scan parameters
+                        
+                        obj.scan_loop = 0;
+                        
+                        obj.scan_end = 0;
+                        
+                        obj.scan_struct = [];
+                        
+                    end
+                    
+                end
                 
             end
             
@@ -2250,25 +2287,22 @@ classdef Adwin < handle
                     
                     copyfile('+Adwin\Default_parameters.m',scan_dir);
                     
-                    obj.msg = ['scan_',num2str(obj.scan_count),'_pic_',num2str(obj.scan_loop)];
-                    
-                    if obj.scan_loop == obj.scan_end
-                        
-                        obj.scanning = 0;
-                        
-                    end
+                    obj.msg = ['scan-',num2str(obj.scan_count),'-pic-',num2str(obj.scan_loop)];
                     
                 end
                 
             else
+                                        
+                % reset scan parameters if manually stopped
                 
-                % reset scan parameters
-                
-                obj.scan_loop = 0;
-                
-                obj.scan_end = 0;
-                
-                obj.scan_struct = [];
+                if ~isempty(obj.scan_struct)
+                        
+                        obj.scan_loop = 0;
+                        
+                        obj.scan_end = 0;
+                        
+                        obj.scan_struct = [];
+                end
                 
                 % check date and create date folder if needed
                 
@@ -2369,11 +2403,11 @@ classdef Adwin < handle
                     
                     copyfile('+Adwin\Default_parameters.m',sc_dir);
                     
-                    obj.msg = ['seq_',num2str(obj.global_saved_count)];
+                    obj.msg = ['seq-',num2str(obj.global_saved_count)];
                     
                 else
                     
-                    obj.msg = 'seq_0';
+                    obj.msg = 'seq-0';
                     
                 end
                 
@@ -2397,7 +2431,7 @@ classdef Adwin < handle
                         
                         for k=1:(length(obj.block_seq_array(i).dig_out_struct(j).timings_array)-1)
                             
-                            obj.dig_out_cell{j}(len_temp+k)=str2double(obj.block_seq_array(i).t_start) + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
+                            obj.dig_out_cell{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start) + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
                             
                         end
                         
@@ -2508,7 +2542,7 @@ classdef Adwin < handle
                                     case 'C'
                                         
                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-                                            str2double(obj.block_seq_array(i).t_start) + ...
+                                            evalin('base',obj.block_seq_array(i).t_start) + ...
                                             obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).abs_out];
                                         
                                         obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
@@ -2609,7 +2643,7 @@ classdef Adwin < handle
                                         
                                         
                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-                                            str2double(obj.block_seq_array(i).t_start) + ...
+                                            evalin('base',obj.block_seq_array(i).t_start) + ...
                                             temp_out_cell*Adwin.Default_parameters.t_res];
                                         
                                         obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
@@ -2800,30 +2834,27 @@ classdef Adwin < handle
                 
             end
             
-            disp(['Start Adwin sequence : duration = ',num2str(Adwin.Default_parameters.seq_duration),' s'])
+            disp(['Start Adwin sequence : duration = ',num2str(obj.seq_duration),' s'])
 
         end
         
         function adw_stop_fcn(obj,~,~)
             
-            %%%
+            %%% stop sequence
             
             Stop_Process(2);
             
             disp('!! Stop Adwin sequence !!');
             
+            % stop progress bar
             
-            % send message pictures ready
+            stop(obj.pgb_timer);
             
-            if ~isempty(obj.msg)
-                
-                obj.net.send_message('BEC009',obj.msg);
-                
-                obj.msg = [];
-                
-            end
-
-            %%%
+            % send message to empty camera buffer
+            
+            obj.net.send_message('BEC009','stop-seq');
+            
+            %%% re-initialize adwin outputs
             
             Start_Process(1);
             
@@ -2848,7 +2879,7 @@ classdef Adwin < handle
             
             c_ofs = 0.;
             r_ofs = 0.;
-            c_wth = pos(3) + 1/floor(Adwin.Default_parameters.seq_duration/Adwin.Default_parameters.pgb_duration);
+            c_wth = pos(3) + 1/floor(obj.seq_duration/Adwin.Default_parameters.pgb_duration);
             r_wth = 1.;
             
             set(obj.amg.hsp5_1_0_0,'Position',[c_ofs r_ofs c_wth r_wth]);
@@ -3661,6 +3692,12 @@ classdef Adwin < handle
 
         end
         
+        function amg_edt5_1_1_clb(obj,~,~)
+            
+            obj.seq_duration = str2double(get(obj.amg.edt5_1_1,'String'));
+            
+        end
+        
         function amg_ckb5_2_clb(obj,~,~)
             
             switch get(obj.amg.ckb5_2,'Value')
@@ -3870,6 +3907,7 @@ classdef Adwin < handle
                     ',''Units''               ,Adwin.Default_parameters.Pushbutton_Units', ...
                     ',''Position''            ,[0.01+',num2str(length(obj.block_seq_array)-1),'*(0.05+0.01) 0.075 0.05 0.85]',  ...
                     ',''Callback''            ,@temp.blk_seq_gui', ...
+                    ',''ButtonDownFcn''       ,@temp.blk_seq_edit_btd_fcn', ...
                     ');']);
                 
                 close(obj.nbg.h);
@@ -3899,12 +3937,37 @@ classdef Adwin < handle
                     ',''Units''               ,Adwin.Default_parameters.Pushbutton_Units', ...
                     ',''Position''            ,[0.01+',num2str(length(obj.block_seq_array)-1),'*(0.05+0.01) 0.075 0.05 0.85]',  ...
                     ',''Callback''            ,@temp.blk_seq_gui', ...
+                    ',''ButtonDownFcn''       ,@temp.blk_seq_edit_btd_fcn', ...
                     ');']);
                 
                 close(obj.nbg.h);
                 
             end
             
+        end
+        
+        function [static_params,dep_params] = get_params(obj)
+            
+            st_params_names = obj.st_params_cell(cellfun(@(x) ~isempty(x),obj.st_params_cell));
+            
+            dep_params_names = obj.st_params_cell(cellfun(@(x) ~isempty(x),obj.dep_params_cell));
+            
+            static_params = struct('name',st_params_names,'value',zeros(size(st_params_names)));
+            
+            for i=1:length(static_params)
+                
+                static_params(i).value = evalin('base',[static_params(i).name,';']);
+                
+            end
+            
+            dep_params = struct('name',dep_params_names,'value',zeros(size(dep_params_names)));
+            
+            for i=1:length(dep_params)
+                
+                dep_params(i).value = evalin('base',[dep_params(i).name,';']);
+                
+            end
+
         end
         
         function reset_all_formulas(obj)
@@ -4191,6 +4254,18 @@ classdef Adwin < handle
            
         end
         
+        function chge_end_state_ana(obj,out,blk_seq_name,value_formula)
+            
+            % Get the right sequence Block
+            
+            tmp_block = obj.block_seq_array(strcmp({obj.block_seq_array.name},blk_seq_name));
+            
+            % Set the Voltage value
+            
+            tmp_block.ana_out_struct(out).voltages_array(end).value_formula = value_formula;
+            
+        end
+        
         function generate_parameters_script_file(obj,sc_name)
             
             fid=fopen([sc_name,'.m'],'w');
@@ -4298,7 +4373,7 @@ classdef Adwin < handle
                 
                 if length(obj.block_seq_array(end).dig_out_struct(i).timings_array)>1
                     
-                    tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out + obj.block_seq_array(end).t_start;
+                    tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out + evalin('base',obj.block_seq_array(end).t_start);
                     
                     if tmp_dur_seq>dur_seq
                         
@@ -4314,7 +4389,7 @@ classdef Adwin < handle
                 
                 if length(obj.block_seq_array(end).ana_out_struct(i).timings_array)>1
                     
-                    tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out + obj.block_seq_array(end).t_start;
+                    tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out + evalin('base',obj.block_seq_array(end).t_start);
                     
                     if tmp_dur_seq>dur_seq
                         
@@ -4356,7 +4431,7 @@ classdef Adwin < handle
             
             if ~isequal(obj.scan_loop,0)
                 
-                dur = (obj.scan_end-obj.scan_loop+1)*Adwin.Default_parameters.seq_duration;
+                dur = (obj.scan_end-obj.scan_loop+1)*obj.seq_duration;
                 
                 set(obj.amg.txt5_2_6,'String',obj.convert_time_to_string(dur));
                 
@@ -4374,7 +4449,7 @@ classdef Adwin < handle
             
             if ~isequal(obj.scan_end,0)
                 
-                dur = obj.scan_end*Adwin.Default_parameters.seq_duration;
+                dur = obj.scan_end*obj.seq_duration;
                 
                 set(obj.amg.txt5_2_8,'String',obj.convert_time_to_string(dur));
                 
@@ -4403,6 +4478,24 @@ classdef Adwin < handle
                 set(obj.amg.txt5_1_2,'String',num2str(obj.global_saved_count));
                 
             end
+            
+        end
+        
+        function postset_seq_duration(obj,~,~)
+            
+            % Update GUI
+            
+            if ~isempty(obj.amg)&&ishandle(obj.amg.h)
+                
+                set(obj.amg.edt5_1_1,'String',obj.seq_duration)
+                
+            end
+            
+            % Update timers
+            
+            obj.adw_timer.Period = obj.seq_duration;
+            
+            obj.pgb_timer.TasksToExecute = floor(obj.seq_duration/Adwin.Default_parameters.pgb_duration);
             
         end
         

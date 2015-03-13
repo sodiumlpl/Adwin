@@ -4,9 +4,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%
-%%%% Block test %%%%
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+%%%% Block Reset %%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 test_adwin.block_seq_array = Adwin.Block;
 
@@ -16,86 +16,290 @@ test_adwin.block_seq_array(1).dig_out_struct(i).timings_array(1).state = Adwin.D
 
 end
 
-test_adwin.block_seq_array(1).name = 'test';
+test_adwin.block_seq_array(1).name = 'Reset';
 test_adwin.block_seq_array(1).t_start = '0';
 
 test_adwin.block_seq_array(1).parent_adwin = test_adwin;
 
 %%%% Digital : 1 : AOM Zeeman %%%%
 
-test_adwin.chge_state_dig(1,'test',[],'t0+0.4*PixelflyAcq-DelayShutter+DelayZeemanPulse');
+test_adwin.chge_state_dig(1,'Reset',[],'Reset_time-DelayShutter');
 
-test_adwin.chge_state_dig(1,'test',1,'DelayShutter');
-
-test_adwin.chge_state_dig(1,'test',2,'PulseZeeman');
-
-test_adwin.chge_state_dig(1,'test',3,'DelayShutter');
-
-test_adwin.chge_state_dig(1,'test',4,'t1-(DelayZeemanPulse+DelayShutter+PulseZeeman+0.4*PixelflyAcq)+0.4*PixelflyAcq-DelayShutter+DelayZeemanPulse');
-
-test_adwin.chge_state_dig(1,'test',5,'DelayShutter');
-
-test_adwin.chge_state_dig(1,'test',6,'PulseZeeman');
-
-test_adwin.chge_state_dig(1,'test',7,'DelayShutter');
+test_adwin.chge_state_dig(1,'Reset',1,'DelayShutter');
 
 %%%% Digital : 2 : AOM MOT %%%%
 
-test_adwin.chge_state_dig(2,'test',[],'t0+0.4*PixelflyAcq+Delay-DelayShutter');
+test_adwin.chge_state_dig(2,'Reset',[],'Reset_time-DelayShutter');
 
-test_adwin.chge_state_dig(2,'test',1,'DelayShutter');
-
-test_adwin.chge_state_dig(2,'test',2,'PulseLength');
-
-test_adwin.chge_state_dig(2,'test',3,'DelayShutter');
-
-test_adwin.chge_state_dig(2,'test',4,'t1-(Delay+PulseLength+DelayShutter+0.4*PixelflyAcq)+0.4*PixelflyAcq+Delay-DelayShutter');
-
-test_adwin.chge_state_dig(2,'test',5,'DelayShutter');
-
-test_adwin.chge_state_dig(2,'test',6,'PulseLength');
-
-test_adwin.chge_state_dig(2,'test',7,'DelayShutter');
+test_adwin.chge_state_dig(2,'Reset',1,'DelayShutter');
 
 %%%% Digital : 4 : Zeeman Shutter %%%%
 
-test_adwin.chge_state_dig(4,'test',[],'t0+0.4*PixelflyAcq-DelayShutter+DelayZeemanPulse');
-
-test_adwin.chge_state_dig(4,'test',1,'DelayShutter+PulseZeeman');
-
-test_adwin.chge_state_dig(4,'test',2,'t1-(PulseZeeman+DelayZeemanPulse+0.4*PixelflyAcq)+0.4*PixelflyAcq-DelayShutter+DelayZeemanPulse');
-
-test_adwin.chge_state_dig(4,'test',3,'DelayShutter+PulseZeeman');
+test_adwin.chge_state_dig(4,'Reset',[],'Reset_time-DelayShutter');
 
 %%%% Digital : 5 : MOT Shutter %%%%
 
-test_adwin.chge_state_dig(5,'test',[],'t0+0.4*PixelflyAcq+Delay-DelayShutter');
-
-test_adwin.chge_state_dig(5,'test',1,'DelayShutter+PulseLength');
-
-test_adwin.chge_state_dig(5,'test',2,'t1-(Delay+PulseLength+0.4*PixelflyAcq)+0.4*PixelflyAcq+Delay-DelayShutter');
-
-test_adwin.chge_state_dig(5,'test',3,'DelayShutter+PulseLength');
+test_adwin.chge_state_dig(5,'Reset',[],'Reset_time-DelayShutter');
 
 %%%% Digital : 7 : Repumper Shutter %%%%
 
-test_adwin.chge_state_dig(7,'test',[],'t0+0.4*PixelflyAcq-DelayShutterRepump');
+test_adwin.chge_state_dig(7,'Reset',[],'Reset_time-DelayShutterRepump');
 
-test_adwin.chge_state_dig(7,'test',1,'PulseRepump+DelayShutterRepump');
+%%%% Digital : 9 : Transport inhib 2 %%%%
+
+test_adwin.chge_state_dig(9,'Reset',[],'Reset_time');
+
+%%%% Digital : 30 : Mechanical Shutter %%%%
+
+test_adwin.chge_state_dig(30,'Reset',[],'Reset_time-DelayShutterMech');
+
+%%%% Analog : 1 : Zeeman AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(1,'Reset','AOM_Zeeman_freq');
+
+%%%% Analog : 2 : MOT AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(2,'Reset','AOM_MOT_freq');
+
+%%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(3,'Reset','AOM_imag_freq');
+
+%%%% Analog : 4 : MOT AOM eff %%%%
+
+test_adwin.chge_end_state_ana(4,'Reset','AOM_MOT_eff');
+
+%%%% Analog : 5 : Imaging AOM eff %%%%
+
+test_adwin.chge_end_state_ana(5,'Reset','AOM_imag_eff');
+
+%%%% Analog : 6 : MOT EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(6,'Reset','EOM_MOT_freq');
+
+%%%% Analog : 7 : Repumper AOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(7,'Reset','AOM_Repumper_freq');
+
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(8,'Reset','EOM_Zeeman_freq');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_end_state_ana(10,'Reset','EOM_Zeeman_amp');
+
+%%%% Analog : Ana 11 %%%%
+
+test_adwin.chge_end_state_ana(11,'Reset','Switch_II_cur');
+
+%%%% Analog : 16 : Zeeman AOM eff %%%%
+
+test_adwin.chge_end_state_ana(16,'Reset','AOM_Zeeman_eff');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Block MOT_loading %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+test_adwin.block_seq_array(2) = Adwin.Block;
+test_adwin.block_seq_array(1).next = test_adwin.block_seq_array(2);
+
+for i = 1:Adwin.Default_parameters.dig_out_nbr
+
+test_adwin.block_seq_array(2).dig_out_struct(i).timings_array(1).state = test_adwin.block_seq_array(1).dig_out_struct(i).timings_array(end).state;
+
+end
+
+test_adwin.block_seq_array(2).name = 'MOT_loading';
+test_adwin.block_seq_array(2).t_start = 'Reset_time';
+
+test_adwin.block_seq_array(2).parent_adwin = test_adwin;
+
+%%%% Digital : 1 : AOM Zeeman %%%%
+
+test_adwin.chge_state_dig(1,'MOT_loading',[],'MOT_loading_time');
+
+%%%% Digital : 4 : Zeeman Shutter %%%%
+
+test_adwin.chge_state_dig(4,'MOT_loading',[],'MOT_loading_time');
+
+%%%% Digital : 7 : Repumper Shutter %%%%
+
+test_adwin.chge_state_dig(7,'MOT_loading',[],'MOT_loading_time');
+
+%%%% Digital : 16 : AOM 200 MHz %%%%
+
+test_adwin.chge_state_dig(16,'MOT_loading',[],'MOT_loading_time');
+
+%%%% Digital : 30 : Mechanical Shutter %%%%
+
+test_adwin.chge_state_dig(30,'MOT_loading',[],'MOT_loading_time');
+
+%%%% Analog : 1 : Zeeman AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(1,'MOT_loading','AOM_Zeeman_freq');
+
+%%%% Analog : 2 : MOT AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(2,'MOT_loading','AOM_MOT_freq');
+
+%%%% Analog : 4 : MOT AOM eff %%%%
+
+test_adwin.chge_end_state_ana(4,'MOT_loading','AOM_MOT_eff');
+
+%%%% Analog : 5 : Imaging AOM eff %%%%
+
+test_adwin.chge_end_state_ana(5,'MOT_loading','AOM_imag_eff');
+
+%%%% Analog : 6 : MOT EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(6,'MOT_loading','EOM_MOT_freq');
+
+%%%% Analog : 7 : Repumper AOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(7,'MOT_loading','AOM_Repumper_freq');
+
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(8,'MOT_loading','EOM_Zeeman_freq');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_end_state_ana(10,'MOT_loading','EOM_Zeeman_amp');
+
+%%%% Analog : Ana 11 %%%%
+
+test_adwin.chge_end_state_ana(11,'MOT_loading','Switch_II_cur');
+
+%%%% Analog : 16 : Zeeman AOM eff %%%%
+
+test_adwin.chge_end_state_ana(16,'MOT_loading','AOM_Zeeman_eff');
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Block Imaging %%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+test_adwin.block_seq_array(3) = Adwin.Block;
+test_adwin.block_seq_array(2).next = test_adwin.block_seq_array(3);
+
+for i = 1:Adwin.Default_parameters.dig_out_nbr
+
+test_adwin.block_seq_array(3).dig_out_struct(i).timings_array(1).state = test_adwin.block_seq_array(2).dig_out_struct(i).timings_array(end).state;
+
+end
+
+test_adwin.block_seq_array(3).name = 'Imaging';
+test_adwin.block_seq_array(3).t_start = 'MOT_loading_time+Reset_time';
+
+test_adwin.block_seq_array(3).parent_adwin = test_adwin;
+
+%%%% Digital : 1 : AOM Zeeman %%%%
+
+test_adwin.chge_state_dig(1,'Imaging',[],'DelayShutter');
+
+%%%% Digital : 2 : AOM MOT %%%%
+
+test_adwin.chge_state_dig(2,'Imaging',[],'Hold_time');
+
+test_adwin.chge_state_dig(2,'Imaging',1,'DelayShutter');
+
+%%%% Digital : 3 : AOM Imaging %%%%
+
+test_adwin.chge_state_dig(3,'Imaging',[],'Hold_time+TOF_time-DelayShutterImaging');
+
+test_adwin.chge_state_dig(3,'Imaging',1,'DelayShutterImaging');
+
+test_adwin.chge_state_dig(3,'Imaging',2,'PulseLength');
+
+test_adwin.chge_state_dig(3,'Imaging',3,'DelayShutterImaging');
+
+test_adwin.chge_state_dig(3,'Imaging',[],'Hold_time+TOF_time+Expo_time+PixelflyAcq+PixelflyAcq-DelayShutterImaging');
+
+test_adwin.chge_state_dig(3,'Imaging',5,'DelayShutterImaging');
+
+test_adwin.chge_state_dig(3,'Imaging',6,'PulseLength');
+
+test_adwin.chge_state_dig(3,'Imaging',7,'DelayShutterImaging');
+
+%%%% Digital : 5 : MOT Shutter %%%%
+
+test_adwin.chge_state_dig(5,'Imaging',[],'Hold_time');
+
+%%%% Digital : 6 : Imaging Shutter %%%%
+
+test_adwin.chge_state_dig(6,'Imaging',[],'Hold_time+TOF_time-DelayShutterImaging');
+
+test_adwin.chge_state_dig(6,'Imaging',1,'DelayShutterImaging+PulseLength');
+
+test_adwin.chge_state_dig(6,'Imaging',[],'Hold_time+TOF_time+Expo_time+PixelflyAcq+PixelflyAcq-DelayShutterImaging');
+
+test_adwin.chge_state_dig(6,'Imaging',3,'DelayShutterImaging+PulseLength');
+
+%%%% Digital : 9 : Transport inhib 2 %%%%
+
+test_adwin.chge_state_dig(9,'Imaging',[],'Hold_time');
 
 %%%% Digital : 13 : Camera Trigger %%%%
 
-test_adwin.chge_state_dig(13,'test',[],'t0');
+test_adwin.chge_state_dig(13,'Imaging',[],'Hold_time+TOF_time-DelayPic');
 
-test_adwin.chge_state_dig(13,'test',1,'2.1*PixelflyAcq');
+test_adwin.chge_state_dig(13,'Imaging',1,'Expo_time+PixelflyAcq');
 
-test_adwin.chge_state_dig(13,'test',2,'t1-2.1*PixelflyAcq');
+test_adwin.chge_state_dig(13,'Imaging',2,'PixelflyAcq');
 
-test_adwin.chge_state_dig(13,'test',3,'2.1*PixelflyAcq');
+test_adwin.chge_state_dig(13,'Imaging',3,'Expo_time+PixelflyAcq');
 
-%%%% Digital : Out 16 %%%%
+%%%% Digital : 16 : AOM 200 MHz %%%%
 
-test_adwin.chge_state_dig(16,'test',[],'t0+0.4*PixelflyAcq');
+test_adwin.chge_state_dig(16,'Imaging',[],'Hold_time+TOF_time-DelayPic+2*Expo_time+3*PixelflyAcq');
 
-test_adwin.chge_state_dig(16,'test',1,'1');
+%%%% Digital : Out 28 %%%%
+
+test_adwin.chge_state_dig(28,'Imaging',[],'Hold_time+TOF_time-DelayPic');
+
+test_adwin.chge_state_dig(28,'Imaging',1,'10');
+
+%%%% Analog : 1 : Zeeman AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(1,'Imaging','AOM_Zeeman_freq');
+
+%%%% Analog : 2 : MOT AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(2,'Imaging','AOM_MOT_freq');
+
+%%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
+
+test_adwin.chge_end_state_ana(3,'Imaging','AOM_imag_freq');
+
+%%%% Analog : 4 : MOT AOM eff %%%%
+
+test_adwin.chge_end_state_ana(4,'Imaging','AOM_MOT_eff');
+
+%%%% Analog : 5 : Imaging AOM eff %%%%
+
+test_adwin.chge_end_state_ana(5,'Imaging','AOM_imag_eff');
+
+%%%% Analog : 6 : MOT EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(6,'Imaging','EOM_MOT_freq');
+
+%%%% Analog : 7 : Repumper AOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(7,'Imaging','AOM_Repumper_freq');
+
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(8,'Imaging','EOM_Zeeman_freq');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_end_state_ana(10,'Imaging','EOM_Zeeman_amp');
+
+%%%% Analog : Ana 11 %%%%
+
+test_adwin.chge_end_state_ana(11,'Imaging','Switch_II_cur');
+
+%%%% Analog : 16 : Zeeman AOM eff %%%%
+
+test_adwin.chge_end_state_ana(16,'Imaging','AOM_Zeeman_eff');
 
