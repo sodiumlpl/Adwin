@@ -42,8 +42,6 @@ classdef Adwin < handle
     
     properties % Timers
         
-        running = 0; % boolean telling if a sequence is running
-        
         adw_timer        % adwin timer
         
         pgb_timer        % progress bar timer
@@ -61,6 +59,8 @@ classdef Adwin < handle
     end
     
     properties (SetObservable = true)
+                
+        running = 0; % boolean telling if a sequence is running
         
         seq_changed = 0; % boolean checking if there has been any modification on the sequence
         
@@ -170,6 +170,8 @@ classdef Adwin < handle
             addlistener(obj,'global_saved_count','PostSet',@obj.postset_global_saved_count);
             
             addlistener(obj,'seq_duration','PostSet',@obj.postset_seq_duration);
+            
+            addlistener(obj,'running','PostSet',@obj.postset_running);
             
             % set date and create date folder
             
@@ -4496,6 +4498,20 @@ classdef Adwin < handle
             obj.adw_timer.Period = obj.seq_duration;
             
             obj.pgb_timer.TasksToExecute = floor(obj.seq_duration/Adwin.Default_parameters.pgb_duration);
+            
+        end
+        
+        function postset_running(obj,~,~)
+            
+            if obj.running
+                
+                set(obj.amg.edt5_1_1,'Enable','off')
+                
+            else
+                
+                set(obj.amg.edt5_1_1,'Enable','on')
+                
+            end
             
         end
         

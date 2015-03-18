@@ -63,7 +63,9 @@ test_adwin.chge_end_state_ana(2,'Reset','AOM_MOT_freq');
 
 %%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
 
-test_adwin.chge_end_state_ana(3,'Reset','AOM_imag_freq');
+test_adwin.chge_state_ana(3,'Reset',[],'Reset_time','Zeeman_rep_freq','C');
+
+test_adwin.chge_end_state_ana(3,'Reset','Zeeman_rep_freq');
 
 %%%% Analog : 4 : MOT AOM eff %%%%
 
@@ -71,7 +73,9 @@ test_adwin.chge_end_state_ana(4,'Reset','AOM_MOT_eff');
 
 %%%% Analog : 5 : Imaging AOM eff %%%%
 
-test_adwin.chge_end_state_ana(5,'Reset','AOM_imag_eff');
+test_adwin.chge_state_ana(5,'Reset',[],'Reset_time','Zeeman_rep_eff','C');
+
+test_adwin.chge_end_state_ana(5,'Reset','Zeeman_rep_eff');
 
 %%%% Analog : 6 : MOT EOM freq [GHz] %%%%
 
@@ -143,13 +147,21 @@ test_adwin.chge_end_state_ana(1,'MOT_loading','AOM_Zeeman_freq');
 
 test_adwin.chge_end_state_ana(2,'MOT_loading','AOM_MOT_freq');
 
+%%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
+
+test_adwin.chge_state_ana(3,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_freq','C');
+
+test_adwin.chge_end_state_ana(3,'MOT_loading','Zeeman_rep_freq');
+
 %%%% Analog : 4 : MOT AOM eff %%%%
 
 test_adwin.chge_end_state_ana(4,'MOT_loading','AOM_MOT_eff');
 
 %%%% Analog : 5 : Imaging AOM eff %%%%
 
-test_adwin.chge_end_state_ana(5,'MOT_loading','AOM_imag_eff');
+test_adwin.chge_state_ana(5,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_eff','C');
+
+test_adwin.chge_end_state_ana(5,'MOT_loading','Zeeman_rep_eff');
 
 %%%% Analog : 6 : MOT EOM freq [GHz] %%%%
 
@@ -269,7 +281,9 @@ test_adwin.chge_end_state_ana(2,'Imaging','AOM_MOT_freq');
 
 %%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
 
-test_adwin.chge_end_state_ana(3,'Imaging','AOM_imag_freq');
+test_adwin.chge_state_ana(3,'Imaging',[],'Imag_block_duration','AOM_imag_freq','C');
+
+test_adwin.chge_end_state_ana(3,'Imaging','Zeeman_rep_freq');
 
 %%%% Analog : 4 : MOT AOM eff %%%%
 
@@ -277,7 +291,9 @@ test_adwin.chge_end_state_ana(4,'Imaging','AOM_MOT_eff');
 
 %%%% Analog : 5 : Imaging AOM eff %%%%
 
-test_adwin.chge_end_state_ana(5,'Imaging','AOM_imag_eff');
+test_adwin.chge_state_ana(5,'Imaging',[],'Imag_block_duration','AOM_imag_eff','C');
+
+test_adwin.chge_end_state_ana(5,'Imaging','Zeeman_rep_eff');
 
 %%%% Analog : 6 : MOT EOM freq [GHz] %%%%
 

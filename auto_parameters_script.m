@@ -6,7 +6,7 @@
 
 test_adwin.st_params_cell{1}='AOM_MOT_freq';
 
-AOM_MOT_freq=295;
+AOM_MOT_freq=297;
 
 test_adwin.st_params_cell{2}='AOM_Repumper_freq';
 
@@ -22,7 +22,7 @@ AOM_Zeeman_freq=310;
 
 test_adwin.st_params_cell{5}='AOM_imag_eff';
 
-AOM_imag_eff=1;
+AOM_imag_eff=0.65;
 
 test_adwin.st_params_cell{6}='AOM_imag_freq';
 
@@ -82,7 +82,7 @@ Life_time=0;
 
 test_adwin.st_params_cell{20}='MOT_loading_time';
 
-MOT_loading_time=10000;
+MOT_loading_time=5000;
 
 test_adwin.st_params_cell{21}='PixelflyAcq';
 
@@ -112,9 +112,19 @@ test_adwin.st_params_cell{27}='Switch_II_cur';
 
 Switch_II_cur=5;
 
+test_adwin.st_params_cell{28}='Zeeman_rep_freq';
+
+Zeeman_rep_freq=330;
+
+test_adwin.st_params_cell{29}='Zeeman_rep_eff';
+
+Zeeman_rep_eff=1;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% ADWIN Dependent Parameters %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+test_adwin.dep_params_cell{1}='Imag_block_duration';
 

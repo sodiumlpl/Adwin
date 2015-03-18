@@ -1366,8 +1366,6 @@ classdef Block < handle
                 
                 obj.ana_out_struct(i).timings_array(end).timing_nbr = obj.ana_out_struct(i).timings_array(end-1).timing_nbr+1;
                 
-                obj.ana_out_struct(i).timings_array(end).state = ~obj.ana_out_struct(i).timings_array(end-1).state;
-                
                 obj.ana_out_struct(i).timings_array(end-1).next = obj.ana_out_struct(i).timings_array(end);
                 
                 obj.ana_out_struct(i).voltages_array(end+1) = Adwin.Voltage;
@@ -1377,8 +1375,6 @@ classdef Block < handle
                 obj.ana_out_struct(i).voltages_array(end).out_nbr = obj.ana_out_struct(i).voltages_array(end-1).out_nbr;
                 
                 obj.ana_out_struct(i).voltages_array(end).voltage_nbr = obj.ana_out_struct(i).voltages_array(end-1).voltage_nbr+1;
-                
-                obj.ana_out_struct(i).voltages_array(end).value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
                 
                 obj.ana_out_struct(i).voltages_array(end).behaviour = 'C';
                 
@@ -1510,6 +1506,8 @@ classdef Block < handle
                 
                 obj.ana_out_struct(i).timings_array(end).out = Inf;
                 
+                obj.ana_out_struct(i).voltages_array(end).value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
+                
             end
 
             obj.parent_adwin.seq_changed = 1;
@@ -1561,8 +1559,6 @@ classdef Block < handle
                 
                 obj.ana_out_struct(i).timings_array(end).timing_nbr = obj.ana_out_struct(i).timings_array(end-1).timing_nbr+1;
                 
-                obj.ana_out_struct(i).timings_array(end).state = ~obj.ana_out_struct(i).timings_array(end-1).state;
-                
                 obj.ana_out_struct(i).timings_array(end-1).next = obj.ana_out_struct(i).timings_array(end);
                 
                 obj.ana_out_struct(i).voltages_array(end+1) = Adwin.Voltage;
@@ -1572,8 +1568,6 @@ classdef Block < handle
                 obj.ana_out_struct(i).voltages_array(end).out_nbr = obj.ana_out_struct(i).voltages_array(end-1).out_nbr;
                 
                 obj.ana_out_struct(i).voltages_array(end).voltage_nbr = obj.ana_out_struct(i).voltages_array(end-1).voltage_nbr+1;
-                
-                obj.ana_out_struct(i).voltages_array(end).value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
                 
                 obj.ana_out_struct(i).voltages_array(end).behaviour = 'C';
                  
@@ -1704,6 +1698,8 @@ classdef Block < handle
                 obj.ana_out_struct(i).timings_array(end).abs_out = Inf;
                 
                 obj.ana_out_struct(i).timings_array(end).out = Inf;
+                
+                obj.ana_out_struct(i).voltages_array(end).value_formula = num2str(Adwin.Default_parameters.ana_out_init{i});
                 
             end
              
