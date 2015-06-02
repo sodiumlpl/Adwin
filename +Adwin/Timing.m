@@ -94,17 +94,13 @@ classdef Timing < handle
             
             if ~isempty(obj.time_ref)
                 
-                %t_res
-                %obj.abs_out = obj.time_ref.abs_out + round(evalin('base',obj.formula)/Adwin.Default_parameters.t_res)*Adwin.Default_parameters.t_res;
-                obj.abs_out = obj.time_ref.abs_out + round(evalin('base',obj.formula)/Adwin.Default_parameters.t_res);
+                obj.abs_out = obj.time_ref.abs_out + round(evalin('base',obj.formula)/evalin('base','Adwin_time_resol'));
                 
                 obj.out = obj.abs_out - obj.previous.abs_out;
                 
             else
                 
-                %t_res
-                %obj.abs_out = round(evalin('base',obj.formula)/Adwin.Default_parameters.t_res)*Adwin.Default_parameters.t_res;
-                obj.abs_out = round(evalin('base',obj.formula)/Adwin.Default_parameters.t_res);
+                obj.abs_out = round(evalin('base',obj.formula)/evalin('base','Adwin_time_resol'));
                 
                 if ~isempty(obj.previous)
                     
@@ -124,12 +120,8 @@ classdef Timing < handle
                     
                     if ~isempty(obj.parent_block.bsg)&&ishandle(obj.parent_block.bsg.h)
                         
-                        %t_res
-%                         eval(['set(obj.parent_block.bsg.text',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
-%                            ',''String''              ,num2str(obj.out)', ...
-%                            ');']);
                         eval(['set(obj.parent_block.bsg.text',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
-                            ',''String''              ,num2str(obj.out*Adwin.Default_parameters.t_res)', ...
+                            ',''String''              ,num2str(obj.out*evalin(''base'',''Adwin_time_resol''))', ...
                             ');']);
                     end
                     
@@ -137,12 +129,8 @@ classdef Timing < handle
                     
                     if ~isempty(obj.parent_block.asg)&&ishandle(obj.parent_block.asg.h)
                         
-                        %%t_res
-%                         eval(['set(obj.parent_block.asg.text3',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
-%                            ',''String''              ,num2str(obj.out)', ...
-%                            ');']);
                         eval(['set(obj.parent_block.asg.text3',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
-                            ',''String''              ,num2str(obj.out*Adwin.Default_parameters.t_res)', ...
+                            ',''String''              ,num2str(obj.out*evalin(''base'',''Adwin_time_resol''))', ...
                             ');']);
                     end
 

@@ -157,7 +157,7 @@ classdef Adwin < handle
             
             % Get the time resolution of the process
             
-            % evalin('base',t_res = Get_Processdelay(2)*10/3*1e-6;)
+            evalin('base','Adwin_time_resol = Get_Processdelay(2)*10/3*1e-6;');
             
             % initialize listeners
             
@@ -1112,7 +1112,7 @@ classdef Adwin < handle
             obj.amg.txt5_1_6 = uicontrol(...
                 'Parent'                ,obj.amg.hsp5_1 ...
                 ,'Style'                ,'text' ...
-                ,'String'               ,[num2str(Adwin.Default_parameters.t_res*1000),' \mus']  ...
+                ,'String'               ,[num2str(evalin('base','Adwin_time_resol')*1000),' \mus']  ...
                 ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
                 ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
                 ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
@@ -2437,9 +2437,7 @@ classdef Adwin < handle
                         
                         for k=1:(length(obj.block_seq_array(i).dig_out_struct(j).timings_array)-1)
                             
-                            %t_res
-                            %obj.dig_out_cell{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start) + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
-                            obj.dig_out_cell{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start)/Adwin.Default_parameters.t_res + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
+                            obj.dig_out_cell{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol') + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
                             
                         end
                         
@@ -2475,14 +2473,10 @@ classdef Adwin < handle
                     
                     for i=1:32
                         
-                        %t_res
-                        %temp_cell{i}(1) = round((temp_cell{i}(1) - t)/Adwin.Default_parameters.t_res)*Adwin.Default_parameters.t_res;
                         temp_cell{i}(1) = temp_cell{i}(1) - t;
                         
                     end
                     
-                    %t_res
-                    %adw_time_seq(index)=t/Adwin.Default_parameters.t_res;
                     adw_time_seq(index)=t;
                     
                     for i=1:31
@@ -2553,12 +2547,8 @@ classdef Adwin < handle
                                     
                                     case 'C'
                                         
-                                        %t_res
-%                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-%                                             evalin('base',obj.block_seq_array(i).t_start) + ...
-%                                             obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).abs_out];
                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-                                            round(evalin('base',obj.block_seq_array(i).t_start)/Adwin.Default_parameters.t_res) + ...
+                                            round(evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol')) + ...
                                             obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).abs_out];
                                         
                                         obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
@@ -2572,8 +2562,6 @@ classdef Adwin < handle
                                         sign_steps = sign(obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(k+1).binary-...
                                             obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(k).binary);
                                         
-                                        %t_res
-                                        %ramp_steps_number = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).out/Adwin.Default_parameters.t_res;
                                         ramp_steps_number = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).out;
                                         
                                         bin_per_step = binary_steps/ramp_steps_number;
@@ -2616,13 +2604,8 @@ classdef Adwin < handle
                                             
                                         end
                                         
-                                        
-                                        %t_res
-%                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-%                                            evalin('base',obj.block_seq_array(i).t_start) + ...
-%                                            temp_out_cell*Adwin.Default_parameters.t_res];
                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
-                                            round(evalin('base',obj.block_seq_array(i).t_start)/Adwin.Default_parameters.t_res) + ...
+                                            round(evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol')) + ...
                                             temp_out_cell];
 
                                         obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
@@ -2691,8 +2674,6 @@ classdef Adwin < handle
                             
                         end
                         
-                        %t_res
-                        %adw_ana_time_seq{l}(index:index+(tmp_len-1))=temp_cell{l}{J(1)}(1:tmp_len)/Adwin.Default_parameters.t_res;
                         adw_ana_time_seq{l}(index:index+(tmp_len-1))=temp_cell{l}{J(1)}(1:tmp_len);
                         
                         tmp_bin_cell = cell(1,Adwin.Default_parameters.ana_crd_out_nbr);
@@ -4318,9 +4299,7 @@ classdef Adwin < handle
                 
                 if length(obj.block_seq_array(end).dig_out_struct(i).timings_array)>1
                     
-                    %t_res
-                    %tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out + evalin('base',obj.block_seq_array(end).t_start);
-                    tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out*Adwin.Default_parameters.t_res + evalin('base',obj.block_seq_array(end).t_start);
+                    tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
                     
                     if tmp_dur_seq>dur_seq
                         
@@ -4336,9 +4315,7 @@ classdef Adwin < handle
                 
                 if length(obj.block_seq_array(end).ana_out_struct(i).timings_array)>1
                     
-                    %t_res
-                    %tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out + evalin('base',obj.block_seq_array(end).t_start);
-                    tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out*Adwin.Default_parameters.t_res + evalin('base',obj.block_seq_array(end).t_start);
+                    tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
                     
                     if tmp_dur_seq>dur_seq
                         
