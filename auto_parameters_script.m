@@ -6,27 +6,27 @@
 
 test_adwin.st_params_cell{1}='AOM_MOT_freq';
 
-AOM_MOT_freq=297;
+AOM_MOT_freq=299;
 
 test_adwin.st_params_cell{2}='AOM_Repumper_freq';
 
-AOM_Repumper_freq=1.711;
+AOM_Repumper_freq=1.771;
 
 test_adwin.st_params_cell{3}='AOM_Zeeman_eff';
 
-AOM_Zeeman_eff=1;
+AOM_Zeeman_eff=0.85;
 
 test_adwin.st_params_cell{4}='AOM_Zeeman_freq';
 
-AOM_Zeeman_freq=310;
+AOM_Zeeman_freq=312;
 
 test_adwin.st_params_cell{5}='AOM_imag_eff';
 
-AOM_imag_eff=0.65;
+AOM_imag_eff=0.3;
 
 test_adwin.st_params_cell{6}='AOM_imag_freq';
 
-AOM_imag_freq=305;
+AOM_imag_freq=306;
 
 test_adwin.st_params_cell{7}='DelayPic';
 
@@ -82,7 +82,7 @@ Life_time=0;
 
 test_adwin.st_params_cell{20}='MOT_loading_time';
 
-MOT_loading_time=5000;
+MOT_loading_time=1000;
 
 test_adwin.st_params_cell{21}='PixelflyAcq';
 
@@ -90,7 +90,7 @@ PixelflyAcq=150;
 
 test_adwin.st_params_cell{22}='PulseLength';
 
-PulseLength=0.01;
+PulseLength=0.001;
 
 test_adwin.st_params_cell{23}='Reset_time';
 
@@ -98,7 +98,7 @@ Reset_time=100;
 
 test_adwin.st_params_cell{24}='TOF_time';
 
-TOF_time=2;
+TOF_time=3;
 
 test_adwin.st_params_cell{25}='AOM_MOT_eff';
 
@@ -110,15 +110,15 @@ cnt=20;
 
 test_adwin.st_params_cell{27}='Switch_II_cur';
 
-Switch_II_cur=5;
+Switch_II_cur=10;
 
 test_adwin.st_params_cell{28}='Zeeman_rep_freq';
 
-Zeeman_rep_freq=330;
+Zeeman_rep_freq=303;
 
 test_adwin.st_params_cell{29}='Zeeman_rep_eff';
 
-Zeeman_rep_eff=1;
+Zeeman_rep_eff=0.85;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

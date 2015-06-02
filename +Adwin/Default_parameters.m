@@ -246,7 +246,7 @@ classdef Default_parameters
         
         max_step_ana = 10100; % maximum number of steps of a analog sequence
         
-        t_res = 0.01; % time resolution in [ms]
+        t_res = 0.001; % time resolution in [ms]
         
         seq_duration = 12;   % sequence total duration
         
