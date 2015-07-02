@@ -6,11 +6,11 @@
 
 test_adwin.st_params_cell{1}='AOM_MOT_freq';
 
-AOM_MOT_freq=299;
+AOM_MOT_freq=309;
 
 test_adwin.st_params_cell{2}='AOM_Repumper_freq';
 
-AOM_Repumper_freq=1.771;
+AOM_Repumper_freq=1.71;
 
 test_adwin.st_params_cell{3}='AOM_Zeeman_eff';
 
@@ -22,11 +22,11 @@ AOM_Zeeman_freq=312;
 
 test_adwin.st_params_cell{5}='AOM_imag_eff';
 
-AOM_imag_eff=0.3;
+AOM_imag_eff=1;
 
 test_adwin.st_params_cell{6}='AOM_imag_freq';
 
-AOM_imag_freq=306;
+AOM_imag_freq=310;
 
 test_adwin.st_params_cell{7}='DelayPic';
 
@@ -46,7 +46,7 @@ DelayShutterImaging=1.2;
 
 test_adwin.st_params_cell{11}='DelayShutterMech';
 
-DelayShutterMech=50;
+DelayShutterMech=200;
 
 test_adwin.st_params_cell{12}='DelayShutterRepump';
 
@@ -74,7 +74,7 @@ Expo_time=2;
 
 test_adwin.st_params_cell{18}='Hold_time';
 
-Hold_time=100;
+Hold_time=200;
 
 test_adwin.st_params_cell{19}='Life_time';
 
@@ -90,11 +90,11 @@ PixelflyAcq=150;
 
 test_adwin.st_params_cell{22}='PulseLength';
 
-PulseLength=0.001;
+PulseLength=20;
 
 test_adwin.st_params_cell{23}='Reset_time';
 
-Reset_time=100;
+Reset_time=250;
 
 test_adwin.st_params_cell{24}='TOF_time';
 
@@ -110,7 +110,7 @@ cnt=20;
 
 test_adwin.st_params_cell{27}='Switch_II_cur';
 
-Switch_II_cur=10;
+Switch_II_cur=0;
 
 test_adwin.st_params_cell{28}='Zeeman_rep_freq';
 
@@ -119,6 +119,22 @@ Zeeman_rep_freq=303;
 test_adwin.st_params_cell{29}='Zeeman_rep_eff';
 
 Zeeman_rep_eff=0.85;
+
+test_adwin.st_params_cell{31}='t0';
+
+t0=1000;
+
+test_adwin.st_params_cell{32}='PulseNonDep';
+
+PulseNonDep=1;
+
+test_adwin.st_params_cell{33}='DelayImag';
+
+DelayImag=10;
+
+test_adwin.st_params_cell{34}='t1';
+
+t1=3000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

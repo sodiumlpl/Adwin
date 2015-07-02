@@ -4176,6 +4176,8 @@ classdef Adwin < handle
             
             tmp_block.ana_out_struct(out).voltages_array(end-1).behaviour = behaviour;
             
+            tmp_block.ana_out_struct(out).voltages_array(end-1).voltage_nbr = tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr;
+            
             tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr = tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr+1;
            
         end
