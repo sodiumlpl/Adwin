@@ -620,6 +620,10 @@ classdef Block < handle
                 
                 plot(ax_dig,x_data{l},y_data{l},'LineStyle','-','Color',cmap(2*l,:))
                 
+                text('Parent',ax_dig,'Units','normalized','Position',[0.5 1/sum(obj.dig_out_show)*(cnt-1)+1.2/sum(obj.dig_out_show)/2],...
+                    'HorizontalAlignment','center','VerticalAlignment','top','Color',cmap(2*l,:),...
+                    'String',obj.dig_out_struct(l).name)
+                
                 plot(ax_dig,linspace(0,tmp_end,10),ones(1,10)*2*(cnt-1),'LineStyle',':','Color',cmap(2*l,:))
                 
                 plot(ax_dig,linspace(0,tmp_end,10),ones(1,10)*2*cnt-1,'LineStyle',':','Color',cmap(2*l,:))

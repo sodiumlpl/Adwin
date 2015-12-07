@@ -2024,6 +2024,19 @@ classdef Adwin < handle
                     ,'Callback'             ,@obj.iog_but_clb ...
                     );
                 
+                obj.iog.but2 = uicontrol(...
+                    'Parent'                ,obj.iog.hsp1 ...
+                    ,'Style'                ,'pushbutton' ...
+                    ,'String'               ,'reset Outputs' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Pushbutton_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
+                    ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
+                    ,'Position'             ,[0.7 0.78 0.22 0.09] ...
+                    ,'Callback'             ,@obj.iog_but2_clb ...
+                    );
+                
             end
             
         end
@@ -2083,6 +2096,84 @@ classdef Adwin < handle
                 SetData_Double(2,int32(adw_out),1);
                 
                 Start_Process(1);
+                
+                obj.seq_changed = 1;
+                
+                disp('!! Re-initialize the digital outputs !!');
+                
+            end
+            
+        end
+        
+        function iog_but2_clb(obj,~,~)
+            
+            if ~obj.running
+                
+                obj.dig_out_init = Adwin.Default_parameters.dig_out_init;
+                
+                adw_out = 0; % initial digital outputs state
+                
+                for i=1:31
+                    
+                    adw_out=adw_out+obj.dig_out_init{i}*2^(i-1);
+                    
+                    switch obj.dig_out_init{i}
+                        
+                        case 1
+                            
+                            eval(['set(obj.iog.hsp3_',num2str(i), ...
+                                ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
+                                ');']);
+                            
+                        case 0
+                            
+                            eval(['set(obj.iog.hsp3_',num2str(i), ...
+                                ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
+                                ');']);
+                            
+                    end
+                    
+                    if ~isempty(obj.block_seq_array)
+                        
+                        obj.block_seq_array(1).dig_out_struct(i).timings_array(1).state = obj.dig_out_init{i};
+                        
+                    end
+                    
+                end
+                
+                if ~isempty(obj.block_seq_array)
+                    
+                    obj.block_seq_array(1).dig_out_struct(32).timings_array(1).state = obj.dig_out_init{32};
+                    
+                end
+                
+                switch obj.dig_out_init{32}
+                    
+                    case 1
+                        
+                        eval(['set(obj.iog.hsp3_',num2str(32), ...
+                            ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
+                            ');']);
+                        
+                    case 0
+                        
+                        eval(['set(obj.iog.hsp3_',num2str(32), ...
+                            ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
+                            ');']);
+                        
+                end
+                
+                if isequal(obj.dig_out_init{32},1)
+                    
+                    adw_out=adw_out-2^31;
+                    
+                end
+                
+                SetData_Double(2,int32(adw_out),1);
+                
+                Start_Process(1);
+                
+                obj.seq_changed = 1;
                 
                 disp('!! Re-initialize the digital outputs !!');
                 
@@ -2976,7 +3067,7 @@ classdef Adwin < handle
                     
                     % Text geometry
                     
-                    c_wth = 0.13;
+                    c_wth = 0.14;
                     c_ofs = 0.0;
                     r_wth = 0.02;
                     r_ofs = 0.975;

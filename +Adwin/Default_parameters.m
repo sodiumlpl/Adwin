@@ -198,12 +198,12 @@ classdef Default_parameters
             ,'8 : Zeeman EOM freq [GHz]' ...       % Ana 8
             ,'9 : Repumper AOM amp'...             % Ana 9
             ,'10 : Zeeman EOM amp'...              % Ana 10
-            ,'Ana 11'...                          % Ana 11
-            ,'Ana 12'...                          % Ana 12
-            ,'Ana 13'...                          % Ana 13
-            ,'Ana 14'...                          % Ana 14
-            ,'15 : Lock AOM eff'...               % Ana 15
-            ,'16 : Zeeman AOM eff'...             % Ana 16
+            ,'11 : Power Supply Int [A]'...        % Ana 11
+            ,'12: MOT EOM amp'...                  % Ana 12
+            ,'Ana 13'...                           % Ana 13
+            ,'Ana 14'...                           % Ana 14
+            ,'15 : Lock AOM eff'...                % Ana 15
+            ,'16 : Zeeman AOM eff'...              % Ana 16
             };
         
         ana_out_init = {...
@@ -246,7 +246,7 @@ classdef Default_parameters
         
         max_step_ana = 10100; % maximum number of steps of a analog sequence
         
-        t_res = 0.001; % time resolution in [ms]
+        t_res = 0.01; % time resolution in [ms]
         
         seq_duration = 12;   % sequence total duration
         
