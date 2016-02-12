@@ -30,6 +30,15 @@ classdef Default_parameters
         
     end
     
+    properties (Constant) % Defaults Panel properties
+        
+        Tab_BackgroundColor = [0.929 0.929 0.929];
+        Tab_ForegroundColor = [0. 0. 0.];
+        
+        Tab_Units = 'normalized';
+
+    end
+    
     properties (Constant) % Defaults Text properties
         
         Text_Units = 'normalized';

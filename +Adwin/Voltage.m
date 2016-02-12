@@ -53,7 +53,7 @@ classdef Voltage < handle
             
             eval(['obj.voltage = Adwin.Calibrations.ana_out_',num2str(obj.out_nbr),'(obj.value);']);
             
-            obj.binary = round(obj.voltage/(10/2^15))+2^15;
+            obj.binary = max(min(round(obj.voltage/(10/2^15))+2^15,2^16-1),0);
             
             if ~isempty(obj.parent_block.asg)&&ishandle(obj.parent_block.asg.h)
                 

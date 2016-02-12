@@ -95,11 +95,23 @@ test_adwin.chge_state_ana(7,'Reset',[],'Reset_time','AOM_Repumper_freq','C');
 
 test_adwin.chge_end_state_ana(7,'Reset','AOM_Repumper_freq');
 
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_state_ana(8,'Reset',[],'Reset_time','EOM_Zeeman_freq','C');
+
+test_adwin.chge_end_state_ana(8,'Reset','EOM_Zeeman_freq');
+
 %%%% Analog : 9 : Repumper AOM amp %%%%
 
 test_adwin.chge_state_ana(9,'Reset',[],'Reset_time','AOM_Repumper_eff','C');
 
 test_adwin.chge_end_state_ana(9,'Reset','AOM_Repumper_eff');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_state_ana(10,'Reset',[],'Reset_time','EOM_Zeeman_amp','C');
+
+test_adwin.chge_end_state_ana(10,'Reset','EOM_Zeeman_amp');
 
 %%%% Analog : 11 : Power Supply Int [A] %%%%
 
@@ -195,11 +207,23 @@ test_adwin.chge_state_ana(7,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_fr
 
 test_adwin.chge_end_state_ana(7,'MOT_loading','AOM_Repumper_freq');
 
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_state_ana(8,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_freq','C');
+
+test_adwin.chge_end_state_ana(8,'MOT_loading','EOM_Zeeman_freq');
+
 %%%% Analog : 9 : Repumper AOM amp %%%%
 
 test_adwin.chge_state_ana(9,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_eff','C');
 
 test_adwin.chge_end_state_ana(9,'MOT_loading','AOM_Repumper_eff');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_state_ana(10,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_amp','C');
+
+test_adwin.chge_end_state_ana(10,'MOT_loading','EOM_Zeeman_amp');
 
 %%%% Analog : 11 : Power Supply Int [A] %%%%
 
@@ -321,9 +345,17 @@ test_adwin.chge_end_state_ana(6,'Imaging','EOM_MOT_freq');
 
 test_adwin.chge_end_state_ana(7,'Imaging','AOM_Repumper_freq');
 
+%%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
+
+test_adwin.chge_end_state_ana(8,'Imaging','EOM_Zeeman_freq');
+
 %%%% Analog : 9 : Repumper AOM amp %%%%
 
 test_adwin.chge_end_state_ana(9,'Imaging','AOM_Repumper_eff');
+
+%%%% Analog : 10 : Zeeman EOM amp %%%%
+
+test_adwin.chge_end_state_ana(10,'Imaging','EOM_Zeeman_amp');
 
 %%%% Analog : 11 : Power Supply Int [A] %%%%
 

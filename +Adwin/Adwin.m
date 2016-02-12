@@ -9,6 +9,8 @@ classdef Adwin < handle
         
         iog     % init out gui
         
+        iag     % init ana gui
+        
         ssg     % set scans gui
         
     end
@@ -26,6 +28,7 @@ classdef Adwin < handle
         
         ana_out_cell  % cell containing the analog outputs timing sequence
         ana_volt_cell % cell containing the analog outputs voltage sequence
+        ana_init_cell % cell containing the initial analog outputs values
         
         dep_params_cell  % cell containing the dependent parameters names
         st_params_cell  % cell containing the static parameters names
@@ -1907,6 +1910,8 @@ classdef Adwin < handle
         
         function init_out_gui(obj,~,~)
             
+            %-----Initialize the digital output GUI-----%
+            
             if ~isempty(obj.iog)&&ishandle(obj.iog.h)
                 
                 set(obj.iog.h,'Visible','on');
@@ -1914,7 +1919,7 @@ classdef Adwin < handle
             else
                 
                 obj.iog.h = figure(...
-                    'Name'                ,'Initialize Initial Outputs Values' ...
+                    'Name'                ,'Initialize Initial Digital Outputs Values' ...
                     ,'NumberTitle'        ,'off' ...
                     ,'Position'           ,[8 48 400 950] ... %,'MenuBar'     ,'none'...
                     );
@@ -1950,7 +1955,7 @@ classdef Adwin < handle
                         ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
                         ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
                         ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
-                        ',''Position''           ,[0.0025 0.0025+(i-1)*((1-33*0.0025)/32+0.0025) 0.55 0.995/32]', ...
+                        ',''Position''           ,[0.0025 0.0025+(i-1)*((1-33*0.0025)/32+0.0025) 0.55 (1-33*0.0025)/32]', ...
                         ');']);
                     
                     eval(['obj.iog.txt_',num2str(i),' = uicontrol(', ...
@@ -2038,6 +2043,161 @@ classdef Adwin < handle
                     );
                 
             end
+            
+            %-----Initialize the analog output GUI-----%
+            
+            if ~isempty(obj.iag)&&ishandle(obj.iag.h)
+                
+                set(obj.iag.h,'Visible','on');
+                
+            else
+                
+                obj.iag.h = figure(...
+                    'Name'                ,'Initialize Initial Analog Outputs Values' ...
+                    ,'NumberTitle'        ,'off' ...
+                    ,'Position'           ,[420 48 400 950] ... %,'MenuBar'     ,'none'...
+                    );
+                
+                obj.iag.tab = uitabgroup(...
+                    'Parent'              ,obj.iag.h ...
+                    ,'TabLocation'        ,'top' ...
+                    ,'Units'              ,Adwin.Default_parameters.Tab_Units ...
+                    ,'Position'           ,[0.015 0.015 0.67 0.97] ...
+                    );
+                
+                obj.ana_init_cell = cell(1,Adwin.Default_parameters.ana_crd);
+                
+                for l=1:Adwin.Default_parameters.ana_crd % go through adwin analog cards
+                    
+                    obj.ana_init_cell{l} = num2cell(zeros(1,Adwin.Default_parameters.ana_crd_out_nbr));
+                    
+                    eval(['obj.iag.tab_',num2str(l),' = uitab(', ...
+                        '''Parent''              ,obj.iag.tab', ...
+                        ',''BackgroundColor''    ,Adwin.Default_parameters.Tab_BackgroundColor', ...
+                        ',''ForegroundColor''    ,Adwin.Default_parameters.Tab_ForegroundColor', ...
+                        ',''Title''              ,''Analog Card ',num2str(l),'''', ...
+                        ',''Units''              ,Adwin.Default_parameters.Tab_Units', ...
+                        ');']);
+                    
+                    
+                    for j=1:length(obj.ana_volt_cell{l}) % go through each outputs of each card
+                        
+                        if ~isempty(obj.block_seq_array)
+                            
+                            obj.ana_init_cell{l}{j} = obj.block_seq_array(1).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(1).value;
+                            
+                        else
+                            
+                            obj.ana_init_cell{l}{j} = Adwin.Default_parameters.ana_out_init{j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr};
+                            
+                        end
+                        
+                        eval(['obj.ana_volt_cell{l}{j} =  max(min(round(Adwin.Calibrations.ana_out_',num2str(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr),'(obj.ana_init_cell{l}{j})/(10/2^15))+2^15,2^16-1),0);']);
+                        
+                        eval(['obj.iag.hsp_',num2str(l),'_',num2str(j),' = uipanel(', ...
+                            '''Parent''              ,obj.iag.tab_',num2str(l), ...
+                            ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                            ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                            ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                            ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                            ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                            ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                            ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                            ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                            ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                            ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                            ',''Position''           ,[0.025 0.025+(j-1)*((1-9*0.025)/8+0.025) 0.95 (1-9*0.025)/8]', ...
+                            ');']);
+                        
+                        eval(['obj.iag.txt_',num2str(l),'_',num2str(j),' = uicontrol(', ...
+                            '''Parent''                ,obj.iag.hsp_',num2str(l),'_',num2str(j), ...
+                            ',''Style''                ,''text''', ...
+                            ',''String''               ,Adwin.Default_parameters.ana_out_name(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr)', ...
+                            ',''FontName''             ,Adwin.Default_parameters.Text_FontName', ...
+                            ',''FontSize''             ,Adwin.Default_parameters.Text_FontSize', ...
+                            ',''FontUnits''            ,Adwin.Default_parameters.Text_FontUnits', ...
+                            ',''FontWeight''           ,Adwin.Default_parameters.Text_FontWeight', ...
+                            ',''HorizontalAlignment''  ,''left''', ...
+                            ',''Units''                ,Adwin.Default_parameters.Text_Units', ...
+                            ',''Position''             ,[0.025 0.15 0.7 0.425]', ...
+                            ');']);
+                        
+                        eval(['obj.iag.hsp2_',num2str(l),'_',num2str(j),' = uipanel(', ...
+                            '''Parent''              ,obj.iag.hsp_',num2str(l),'_',num2str(j), ...
+                            ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                            ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                            ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                            ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                            ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                            ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                            ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                            ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                            ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                            ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                            ',''Position''           ,[0.75 0.3 0.2 0.4]', ...
+                            ');']);
+                        
+                        
+                        eval(['obj.iag.edit',num2str(l),'_',num2str(j),' = uicontrol(', ...
+                            '''Parent''               ,obj.iag.hsp2_',num2str(l),'_',num2str(j), ...
+                            ',''Style''               ,''edit''', ...
+                            ',''String''              ,num2str(obj.ana_init_cell{l}{j})', ...
+                            ',''ForegroundColor''     ,[0,0,0]', ...
+                            ',''Units''               ,Adwin.Default_parameters.Edit_Units', ...
+                            ',''Position''            ,[0. 0.0 1.0 1.0]',  ...
+                            ',''Callback''            ,@obj.iag_edit_clb', ...
+                            ',''Tag''                 ,','''tag_',num2str(l),'_',num2str(j),'''', ...
+                            ');']);
+                        
+                    end
+                    
+                end
+                
+                obj.iag.hsp3 = uipanel(...
+                    'Parent'              ,obj.iag.h ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[0.67+0.015 0.015 0.3 0.97] ...
+                    );
+                
+                
+                obj.iag.but = uicontrol(...
+                    'Parent'                ,obj.iag.hsp3 ...
+                    ,'Style'                ,'pushbutton' ...
+                    ,'String'               ,'set Outputs' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Pushbutton_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
+                    ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
+                    ,'Position'             ,[0.15 0.9 0.7 0.09] ...
+                    ,'Callback'             ,@obj.iag_but_clb ...
+                    );
+                
+                obj.iag.but2 = uicontrol(...
+                    'Parent'                ,obj.iag.hsp3 ...
+                    ,'Style'                ,'pushbutton' ...
+                    ,'String'               ,'reset Outputs' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Pushbutton_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
+                    ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
+                    ,'Position'             ,[0.15 0.78 0.7 0.09] ...
+                    ,'Callback'             ,@obj.iag_but2_clb ...
+                    );
+                
+            end
+            
+            obj.seq_changed = 1;
             
         end
         
@@ -2181,6 +2341,140 @@ classdef Adwin < handle
             
         end
         
+        function iag_edit_clb(obj,~,~)
+            
+            tag_edt=get(gcbo,'Tag');
+            
+            split_tag=regexp(tag_edt,'_','split');
+            
+            l=str2double(split_tag{2});
+            
+            j=str2double(split_tag{3});
+            
+            obj.ana_init_cell{l}{j}=str2double(get(gcbo,'String'));
+            
+            eval(['obj.ana_volt_cell{l}{j} =  max(min(round(Adwin.Calibrations.ana_out_',num2str(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr),'(obj.ana_init_cell{l}{j})/(10/2^15))+2^15,2^16-1),0);']);
+            
+        end
+        
+        function iag_but_clb(obj,~,~)
+            
+            if ~obj.running
+                
+                adw_ana_out_seq = cell(1,Adwin.Default_parameters.ana_crd); % analog outputs state sequence
+                
+                for l=1:Adwin.Default_parameters.ana_crd
+                    
+                    adw_ana_out_seq{l} = 32768*ones(1,4*Adwin.Default_parameters.max_step_ana)-2^31;
+                    
+                    for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
+                        
+                        if (obj.ana_volt_cell{l}{2*i}(1)>=2^15)
+                            
+                            adw_ana_out_seq{l}(i) = obj.ana_volt_cell{l}{2*i-1}+mod(obj.ana_volt_cell{l}{2*i},2^15)*2^16-2^31;
+                            
+                        else
+                            
+                            adw_ana_out_seq{l}(i) = obj.ana_volt_cell{l}{2*i-1}+obj.ana_volt_cell{l}{2*i}*2^16;
+                            
+                        end
+                        
+                    end
+                    
+                    % Set Adwin memory
+                    
+                    disp(['Analog output table sent to Adwin (8 first terms) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n',adw_ana_out_seq{l}(1:8));
+                    disp(['Analog output table sent to Adwin (9 to 16) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n \n',adw_ana_out_seq{l}(9:16));
+                    
+                    SetData_Double(Adwin.Default_parameters.ana_data_out_array(l),int32(adw_ana_out_seq{l}),1);
+                    
+                end
+                
+                Start_Process(1);
+                
+                obj.seq_changed = 1;
+                
+                disp('!! Re-initialize analog outputs !!');
+                
+            end
+            
+        end
+        
+        function iag_but2_clb(obj,~,~)
+            
+            %-----Re-initialize analog output voltages-----%
+            
+            for l=1:Adwin.Default_parameters.ana_crd % go through adwin analog cards
+                
+                for j=1:length(obj.ana_volt_cell{l}) % go through each outputs of each card
+                    
+                    if ~isempty(obj.block_seq_array)
+                        
+                        obj.ana_init_cell{l}{j} = obj.block_seq_array(1).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(1).value;
+                        
+                    else
+                        
+                        obj.ana_init_cell{l}{j} = Adwin.Default_parameters.ana_out_init{j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr};
+                        
+                    end
+                    
+                    eval(['obj.ana_volt_cell{l}{j} =  max(min(round(Adwin.Calibrations.ana_out_',num2str(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr),'(obj.ana_init_cell{l}{j})/(10/2^15))+2^15,2^16-1),0);']);
+                    
+                    eval(['set(obj.iag.edit',num2str(l),'_',num2str(j), ...
+                        ',''String''               ,num2str(obj.ana_init_cell{l}{j})', ...
+                        ');']);
+                    
+                end
+                
+            end
+            
+            %-----Update Adwin memory and set voltages-----%
+            
+            if ~obj.running
+                
+                adw_ana_out_seq = cell(1,Adwin.Default_parameters.ana_crd); % analog outputs state sequence
+                
+                for l=1:Adwin.Default_parameters.ana_crd
+                    
+                    adw_ana_out_seq{l} = 32768*ones(1,4*Adwin.Default_parameters.max_step_ana)-2^31;
+                    
+                    for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
+                        
+                        if (obj.ana_volt_cell{l}{2*i}(1)>=2^15)
+                            
+                            adw_ana_out_seq{l}(i) = obj.ana_volt_cell{l}{2*i-1}+mod(obj.ana_volt_cell{l}{2*i},2^15)*2^16-2^31;
+                            
+                        else
+                            
+                            adw_ana_out_seq{l}(i) = obj.ana_volt_cell{l}{2*i-1}+obj.ana_volt_cell{l}{2*i}*2^16;
+                            
+                        end
+                        
+                    end
+                    
+                    % Set Adwin memory
+                    
+                    disp(['Analog output table sent to Adwin (8 first terms) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n',adw_ana_out_seq{l}(1:8));
+                    disp(['Analog output table sent to Adwin (9 to 16) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n \n',adw_ana_out_seq{l}(9:16));
+                    
+                    SetData_Double(Adwin.Default_parameters.ana_data_out_array(l),int32(adw_ana_out_seq{l}),1);
+                    
+                end
+                
+                Start_Process(1);
+                
+                obj.seq_changed = 1;
+                
+                disp('!! Re-initialize analog outputs !!');
+                
+            end
+            
+        end
+        
         function amg_but2_2_clb(obj,~,~)
             
             switch obj.running
@@ -2212,24 +2506,6 @@ classdef Adwin < handle
         function adw_timer_fcn(obj,~,~)
 
             if obj.running
-                
-                % send message pictures ready
-                
-                if ~isempty(obj.msg)
-                    
-                    % save parameters file
-                    
-                    [static_params,dep_params] = obj.get_params;
-                    
-                    save([Adwin.Default_parameters.params_path,'params.mat'],'static_params','dep_params');
-                    
-                    % send message to Data-Treatment computer
-                    
-                    obj.net.send_message('BEC009',obj.msg);
-                    
-                    obj.msg = [];
-                    
-                end
                 
                 % Stop Adwin process
                 
@@ -2347,13 +2623,15 @@ classdef Adwin < handle
                         
                         evalin('base',[obj.scan_struct(i).name,' = ',num2str(obj.scan_struct(i).out_vec(obj.scan_loop)),';']);
                         
-                        j = floor(obj.scan_struct(i).index/Adwin.Default_parameters.nb_r_stat_params)+1;
+                        j = floor(obj.scan_struct(i).index/Adwin.Default_parameters.nb_r_stat_params);
                         
                         k = mod(obj.scan_struct(i).index,Adwin.Default_parameters.nb_r_stat_params);
                         
                         if (k==0)
                             
                             k=Adwin.Default_parameters.nb_r_stat_params;
+                            
+                            j=j-1;
                             
                         end
                         
@@ -2510,7 +2788,7 @@ classdef Adwin < handle
                 
             end
             
-            if obj.seq_changed
+            if obj.seq_changed % update Adwin memory if the sequence has changed
                 
                 %%% Set digital outputs
                 
@@ -2622,13 +2900,13 @@ classdef Adwin < handle
                 % Create analog outputs timings and voltage cell for each
                 % analog outputs card
                 
-                for l=1:Adwin.Default_parameters.ana_crd
+                for l=1:Adwin.Default_parameters.ana_crd % go through adwin analog cards
                     
-                    for j=1:length(obj.ana_out_cell{l})
+                    for j=1:length(obj.ana_out_cell{l}) % go through each outputs of each card
                         
-                        obj.ana_out_cell{l}{j}=[];
+                        obj.ana_out_cell{l}{j}=[]; % output structures containing timings of analog outputs 
                         
-                        obj.ana_volt_cell{l}{j}=[];
+                        obj.ana_volt_cell{l}{j}=[]; % output structure containing analog output voltage values
                         
                         for i=1:length(obj.block_seq_array)
                             
@@ -2706,17 +2984,68 @@ classdef Adwin < handle
                                 
                             end
                             
+                            %%% New Block
+                            
+                            if isequal(i,length(obj.block_seq_array))
+                                
+                                obj.ana_out_cell{l}{j}=[obj.ana_out_cell{l}{j},Inf];
+                                
+                                obj.ana_volt_cell{l}{j}=[obj.ana_volt_cell{l}{j},obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(end).binary];
+                                
+                            else
+                                
+                                obj.ana_out_cell{l}{j}=[obj.ana_out_cell{l}{j},round(evalin('base',obj.block_seq_array(i+1).t_start)/evalin('base','Adwin_time_resol'))];
+                                
+                                obj.ana_volt_cell{l}{j}=[obj.ana_volt_cell{l}{j},obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(end).binary];
+                                
+                            end
+                            
+                            %%%
+                            
                         end
                         
-                        obj.ana_out_cell{l}{j}=[obj.ana_out_cell{l}{j},Inf];
+                        %%% Old Block
                         
-                        obj.ana_volt_cell{l}{j}=[obj.ana_volt_cell{l}{j},obj.block_seq_array(end).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(end).binary];
+                        %obj.ana_out_cell{l}{j}=[obj.ana_out_cell{l}{j},Inf];
+                        
+                        %obj.ana_volt_cell{l}{j}=[obj.ana_volt_cell{l}{j},obj.block_seq_array(end).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(end).binary];
   
+                        %%%
+                        
                         if (length(obj.ana_out_cell{l}{j})>1)
                             
                             obj.ana_out_cell{l}{j}(2:end) = obj.ana_out_cell{l}{j}(2:end) - obj.ana_out_cell{l}{j}(1:(end-1));
                             
                         end
+                        
+                        %%% New Block clean structures
+                        
+                        tmp_out = obj.ana_out_cell{l}{j}(1);
+                        tmp_volt = obj.ana_volt_cell{l}{j}(1);
+                        
+                        for i=2:length(obj.ana_out_cell{l}{j})
+                            
+                            if isequal(tmp_volt(end),obj.ana_volt_cell{l}{j}(i))
+                                
+                                tmp_out(end) = tmp_out(end) + obj.ana_out_cell{l}{j}(i);
+                                
+                            else
+                                
+                                if ~isequal(obj.ana_out_cell{l}{j}(i),0)
+                                    
+                                    tmp_out(end+1) = obj.ana_out_cell{l}{j}(i);
+                                    tmp_volt(end+1) = obj.ana_volt_cell{l}{j}(i);
+                                    
+                                end
+                                
+                            end
+                            
+                        end
+                        
+                        obj.ana_out_cell{l}{j} = tmp_out;
+                        obj.ana_volt_cell{l}{j} = tmp_volt;
+                        
+                        %%%
                         
                     end
                     
@@ -2824,6 +3153,15 @@ classdef Adwin < handle
                         
                     end
                     
+                    % display the 10 first terms of the tables sent to the adwin
+                    
+                    disp(['Time table sent to Adwin (4 first terms) - card ',num2str(l)])
+                    fprintf('%d %d %d %d \n',adw_ana_time_seq{l}(1:4));
+                    disp(['Analog output table sent to Adwin (8 first terms) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n',adw_ana_out_seq{l}(1:8));
+                    disp(['Analog output table sent to Adwin (9 to 16) - card ',num2str(l)])
+                    fprintf('%d %d %d %d %d %d %d %d \n \n',adw_ana_out_seq{l}(9:16));
+                    
                     SetData_Double(Adwin.Default_parameters.ana_data_time_array(l),int32(adw_ana_time_seq{l}),1);
                     SetData_Double(Adwin.Default_parameters.ana_data_out_array(l),int32(adw_ana_out_seq{l}),1);
                     
@@ -2851,7 +3189,23 @@ classdef Adwin < handle
                 
             end
             
+            %-----send sequence duration to camera-----%
+            
             disp(['Start Adwin sequence : duration = ',num2str(obj.seq_duration),' s'])
+            
+            obj.net.send_message('BEC009',['seq_duration-',num2str(obj.seq_duration)]);
+            
+            %-----send message pictures incoming-----%
+            
+            % save parameters file
+            
+            [static_params,dep_params] = obj.get_params;
+            
+            save([Adwin.Default_parameters.params_path,'params.mat'],'static_params','dep_params');
+            
+            % send message to Data-Treatment computer
+            
+            obj.net.send_message('BEC009',obj.msg);
 
         end
         
@@ -3793,7 +4147,7 @@ classdef Adwin < handle
                     
                     tmp_order_array = [obj.scans_params_struct.order];
                     
-                    [tmp_max_order,ind_max_order]=max(tmp_order_array);
+                    [~,ind_max_order]=max(tmp_order_array);
                     
                     k = floor(ind_max_order/Adwin.Default_parameters.nb_r_stat_params)+1;
                     
@@ -4384,43 +4738,47 @@ classdef Adwin < handle
         
         function postset_seq_changed(obj,~,~)
             
-            %%% Calculate sequence duration and set it
-            
-            dur_seq = 0;
-            
-            for i=1:length(obj.block_seq_array(end).dig_out_struct)
+            if ~isempty(obj.block_seq_array)
                 
-                if length(obj.block_seq_array(end).dig_out_struct(i).timings_array)>1
-                    
-                    tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
-                    
-                    if tmp_dur_seq>dur_seq
-                        
-                        dur_seq = tmp_dur_seq;
-                        
-                    end
-                    
-                end
+                %%% Calculate sequence duration and set it
                 
-            end
-            
-            for i=1:length(obj.block_seq_array(end).ana_out_struct)
+                dur_seq = 0;
                 
-                if length(obj.block_seq_array(end).ana_out_struct(i).timings_array)>1
+                for i=1:length(obj.block_seq_array(end).dig_out_struct)
                     
-                    tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
-                    
-                    if tmp_dur_seq>dur_seq
+                    if length(obj.block_seq_array(end).dig_out_struct(i).timings_array)>1
                         
-                        dur_seq = tmp_dur_seq;
+                        tmp_dur_seq = obj.block_seq_array(end).dig_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
+                        
+                        if tmp_dur_seq>dur_seq
+                            
+                            dur_seq = tmp_dur_seq;
+                            
+                        end
                         
                     end
                     
                 end
                 
+                for i=1:length(obj.block_seq_array(end).ana_out_struct)
+                    
+                    if length(obj.block_seq_array(end).ana_out_struct(i).timings_array)>1
+                        
+                        tmp_dur_seq = obj.block_seq_array(end).ana_out_struct(i).timings_array(end-1).abs_out*evalin('base','Adwin_time_resol') + evalin('base',obj.block_seq_array(end).t_start);
+                        
+                        if tmp_dur_seq>dur_seq
+                            
+                            dur_seq = tmp_dur_seq;
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+                set(obj.amg.txt5_1_10,'String',[num2str(dur_seq/1000),' s'])
+                
             end
-            
-            set(obj.amg.txt5_1_10,'String',[num2str(dur_seq/1000),' s'])
             
         end
         

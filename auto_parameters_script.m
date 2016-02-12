@@ -26,7 +26,7 @@ AOM_Zeeman_eff=1;
 
 test_adwin.st_params_cell{6}='AOM_Zeeman_freq';
 
-AOM_Zeeman_freq=312;
+AOM_Zeeman_freq=311;
 
 test_adwin.st_params_cell{7}='AOM_imag_eff';
 
@@ -114,7 +114,7 @@ Switch_II_cur=5;
 
 test_adwin.st_params_cell{28}='TOF_time';
 
-TOF_time=2;
+TOF_time=4;
 
 test_adwin.st_params_cell{29}='Zeeman_rep_eff';
 
@@ -122,7 +122,7 @@ Zeeman_rep_eff=1;
 
 test_adwin.st_params_cell{30}='Zeeman_rep_freq';
 
-Zeeman_rep_freq=280;
+Zeeman_rep_freq=271;
 
 test_adwin.st_params_cell{31}='cnt';
 
