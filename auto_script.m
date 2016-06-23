@@ -10,7 +10,7 @@
 
 test_adwin.block_seq_array = Adwin.Block;
 
-for i = 1:Adwin.Default_parameters.dig_out_nbr
+for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr
 
 test_adwin.block_seq_array(1).dig_out_struct(i).timings_array(1).state = Adwin.Default_parameters.dig_out_init{i};
 
@@ -55,79 +55,79 @@ test_adwin.chge_state_dig(30,'Reset',[],'Reset_time-DelayShutterMech');
 
 %%%% Analog : 1 : Zeeman AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(1,'Reset',[],'Reset_time','AOM_Zeeman_freq','C');
+test_adwin.chge_state_ana(1,'Reset',[],'Reset_time','AOM_Zeeman_freq','C','');
 
 test_adwin.chge_end_state_ana(1,'Reset','AOM_Zeeman_freq');
 
 %%%% Analog : 2 : MOT AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(2,'Reset',[],'Reset_time','AOM_MOT_freq','C');
+test_adwin.chge_state_ana(2,'Reset',[],'Reset_time','AOM_MOT_freq','C','');
 
 test_adwin.chge_end_state_ana(2,'Reset','AOM_MOT_freq');
 
 %%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(3,'Reset',[],'Reset_time','Zeeman_rep_freq','C');
+test_adwin.chge_state_ana(3,'Reset',[],'Reset_time','Zeeman_rep_freq','C','');
 
 test_adwin.chge_end_state_ana(3,'Reset','Zeeman_rep_freq');
 
 %%%% Analog : 4 : MOT AOM eff %%%%
 
-test_adwin.chge_state_ana(4,'Reset',[],'Reset_time','AOM_MOT_eff','C');
+test_adwin.chge_state_ana(4,'Reset',[],'Reset_time','AOM_MOT_eff','C','');
 
 test_adwin.chge_end_state_ana(4,'Reset','AOM_MOT_eff');
 
 %%%% Analog : 5 : Imaging AOM eff %%%%
 
-test_adwin.chge_state_ana(5,'Reset',[],'Reset_time','Zeeman_rep_eff','C');
+test_adwin.chge_state_ana(5,'Reset',[],'Reset_time','Zeeman_rep_eff','C','');
 
 test_adwin.chge_end_state_ana(5,'Reset','Zeeman_rep_eff');
 
 %%%% Analog : 6 : MOT EOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(6,'Reset',[],'Reset_time','EOM_MOT_freq','C');
+test_adwin.chge_state_ana(6,'Reset',[],'Reset_time','EOM_MOT_freq','C','');
 
 test_adwin.chge_end_state_ana(6,'Reset','EOM_MOT_freq');
 
 %%%% Analog : 7 : Repumper AOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(7,'Reset',[],'Reset_time','AOM_Repumper_freq','C');
+test_adwin.chge_state_ana(7,'Reset',[],'Reset_time','AOM_Repumper_freq','C','');
 
 test_adwin.chge_end_state_ana(7,'Reset','AOM_Repumper_freq');
 
 %%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(8,'Reset',[],'Reset_time','EOM_Zeeman_freq','C');
+test_adwin.chge_state_ana(8,'Reset',[],'Reset_time','EOM_Zeeman_freq','C','');
 
 test_adwin.chge_end_state_ana(8,'Reset','EOM_Zeeman_freq');
 
 %%%% Analog : 9 : Repumper AOM amp %%%%
 
-test_adwin.chge_state_ana(9,'Reset',[],'Reset_time','AOM_Repumper_eff','C');
+test_adwin.chge_state_ana(9,'Reset',[],'Reset_time','AOM_Repumper_eff','C','');
 
 test_adwin.chge_end_state_ana(9,'Reset','AOM_Repumper_eff');
 
 %%%% Analog : 10 : Zeeman EOM amp %%%%
 
-test_adwin.chge_state_ana(10,'Reset',[],'Reset_time','EOM_Zeeman_amp','C');
+test_adwin.chge_state_ana(10,'Reset',[],'Reset_time','EOM_Zeeman_amp','C','');
 
 test_adwin.chge_end_state_ana(10,'Reset','EOM_Zeeman_amp');
 
 %%%% Analog : 11 : Power Supply Int [A] %%%%
 
-test_adwin.chge_state_ana(11,'Reset',[],'Reset_time','Switch_II_cur','C');
+test_adwin.chge_state_ana(11,'Reset',[],'Reset_time','Switch_II_cur','C','');
 
 test_adwin.chge_end_state_ana(11,'Reset','Switch_II_cur');
 
 %%%% Analog : 12: MOT EOM amp %%%%
 
-test_adwin.chge_state_ana(12,'Reset',[],'Reset_time','EOM_MOT_amp','C');
+test_adwin.chge_state_ana(12,'Reset',[],'Reset_time','EOM_MOT_amp','C','');
 
 test_adwin.chge_end_state_ana(12,'Reset','EOM_MOT_amp');
 
 %%%% Analog : 16 : Zeeman AOM eff %%%%
 
-test_adwin.chge_state_ana(16,'Reset',[],'Reset_time','AOM_Zeeman_eff','C');
+test_adwin.chge_state_ana(16,'Reset',[],'Reset_time','AOM_Zeeman_eff','C','');
 
 test_adwin.chge_end_state_ana(16,'Reset','AOM_Zeeman_eff');
 
@@ -138,7 +138,7 @@ test_adwin.chge_end_state_ana(16,'Reset','AOM_Zeeman_eff');
 test_adwin.block_seq_array(2) = Adwin.Block;
 test_adwin.block_seq_array(1).next = test_adwin.block_seq_array(2);
 
-for i = 1:Adwin.Default_parameters.dig_out_nbr
+for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr
 
 test_adwin.block_seq_array(2).dig_out_struct(i).timings_array(1).state = test_adwin.block_seq_array(1).dig_out_struct(i).timings_array(end).state;
 
@@ -167,79 +167,79 @@ test_adwin.chge_state_dig(30,'MOT_loading',[],'MOT_loading_time');
 
 %%%% Analog : 1 : Zeeman AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(1,'MOT_loading',[],'MOT_loading_time','AOM_Zeeman_freq','C');
+test_adwin.chge_state_ana(1,'MOT_loading',[],'MOT_loading_time','AOM_Zeeman_freq','C','');
 
 test_adwin.chge_end_state_ana(1,'MOT_loading','AOM_Zeeman_freq');
 
 %%%% Analog : 2 : MOT AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(2,'MOT_loading',[],'MOT_loading_time','AOM_MOT_freq','C');
+test_adwin.chge_state_ana(2,'MOT_loading',[],'MOT_loading_time','AOM_MOT_freq','C','');
 
 test_adwin.chge_end_state_ana(2,'MOT_loading','AOM_MOT_freq');
 
 %%%% Analog : 3 : Imaging AOM freq [MHz] %%%%
 
-test_adwin.chge_state_ana(3,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_freq','C');
+test_adwin.chge_state_ana(3,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_freq','C','');
 
 test_adwin.chge_end_state_ana(3,'MOT_loading','Zeeman_rep_freq');
 
 %%%% Analog : 4 : MOT AOM eff %%%%
 
-test_adwin.chge_state_ana(4,'MOT_loading',[],'MOT_loading_time','AOM_MOT_eff','C');
+test_adwin.chge_state_ana(4,'MOT_loading',[],'MOT_loading_time','AOM_MOT_eff','C','');
 
 test_adwin.chge_end_state_ana(4,'MOT_loading','AOM_MOT_eff');
 
 %%%% Analog : 5 : Imaging AOM eff %%%%
 
-test_adwin.chge_state_ana(5,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_eff','C');
+test_adwin.chge_state_ana(5,'MOT_loading',[],'MOT_loading_time','Zeeman_rep_eff','C','');
 
 test_adwin.chge_end_state_ana(5,'MOT_loading','Zeeman_rep_eff');
 
 %%%% Analog : 6 : MOT EOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(6,'MOT_loading',[],'MOT_loading_time','EOM_MOT_freq','C');
+test_adwin.chge_state_ana(6,'MOT_loading',[],'MOT_loading_time','EOM_MOT_freq','C','');
 
 test_adwin.chge_end_state_ana(6,'MOT_loading','EOM_MOT_freq');
 
 %%%% Analog : 7 : Repumper AOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(7,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_freq','C');
+test_adwin.chge_state_ana(7,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_freq','C','');
 
 test_adwin.chge_end_state_ana(7,'MOT_loading','AOM_Repumper_freq');
 
 %%%% Analog : 8 : Zeeman EOM freq [GHz] %%%%
 
-test_adwin.chge_state_ana(8,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_freq','C');
+test_adwin.chge_state_ana(8,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_freq','C','');
 
 test_adwin.chge_end_state_ana(8,'MOT_loading','EOM_Zeeman_freq');
 
 %%%% Analog : 9 : Repumper AOM amp %%%%
 
-test_adwin.chge_state_ana(9,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_eff','C');
+test_adwin.chge_state_ana(9,'MOT_loading',[],'MOT_loading_time','AOM_Repumper_eff','C','');
 
 test_adwin.chge_end_state_ana(9,'MOT_loading','AOM_Repumper_eff');
 
 %%%% Analog : 10 : Zeeman EOM amp %%%%
 
-test_adwin.chge_state_ana(10,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_amp','C');
+test_adwin.chge_state_ana(10,'MOT_loading',[],'MOT_loading_time','EOM_Zeeman_amp','C','');
 
 test_adwin.chge_end_state_ana(10,'MOT_loading','EOM_Zeeman_amp');
 
 %%%% Analog : 11 : Power Supply Int [A] %%%%
 
-test_adwin.chge_state_ana(11,'MOT_loading',[],'MOT_loading_time','Switch_II_cur','C');
+test_adwin.chge_state_ana(11,'MOT_loading',[],'MOT_loading_time','Switch_II_cur','C','');
 
 test_adwin.chge_end_state_ana(11,'MOT_loading','Switch_II_cur');
 
 %%%% Analog : 12: MOT EOM amp %%%%
 
-test_adwin.chge_state_ana(12,'MOT_loading',[],'MOT_loading_time','EOM_MOT_amp','C');
+test_adwin.chge_state_ana(12,'MOT_loading',[],'MOT_loading_time','EOM_MOT_amp','C','');
 
 test_adwin.chge_end_state_ana(12,'MOT_loading','EOM_MOT_amp');
 
 %%%% Analog : 16 : Zeeman AOM eff %%%%
 
-test_adwin.chge_state_ana(16,'MOT_loading',[],'MOT_loading_time','AOM_Zeeman_eff','C');
+test_adwin.chge_state_ana(16,'MOT_loading',[],'MOT_loading_time','AOM_Zeeman_eff','C','');
 
 test_adwin.chge_end_state_ana(16,'MOT_loading','AOM_Zeeman_eff');
 
@@ -250,7 +250,7 @@ test_adwin.chge_end_state_ana(16,'MOT_loading','AOM_Zeeman_eff');
 test_adwin.block_seq_array(3) = Adwin.Block;
 test_adwin.block_seq_array(2).next = test_adwin.block_seq_array(3);
 
-for i = 1:Adwin.Default_parameters.dig_out_nbr
+for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr
 
 test_adwin.block_seq_array(3).dig_out_struct(i).timings_array(1).state = test_adwin.block_seq_array(2).dig_out_struct(i).timings_array(end).state;
 

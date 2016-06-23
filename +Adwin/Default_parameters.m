@@ -112,7 +112,13 @@ classdef Default_parameters
     
     properties (Constant) % Default digital outputs properties
         
+        dig_crd = 2;         % Number of digital outputs cards
+        
         dig_out_nbr = 32;
+        
+        dig_data_time_array = [1,7];
+        
+        dig_data_out_array = [2,8];
         
         dig_out_name = {...
              '1 : AOM Zeeman'...           % Out 1
@@ -147,6 +153,38 @@ classdef Default_parameters
             ,'30 : Mechanical Shutter'...  % Out 30
             ,'31 : AOM 200 MHz'...         % Out 31
             ,'32 : AOMs On'...             % Out 32
+            ,'Out 33'...                   % Out 33
+            ,'Out 34'...                   % Out 34
+            ,'Out 35'...                   % Out 35
+            ,'Out 36'...                   % Out 36
+            ,'Out 37'...                   % Out 37
+            ,'Out 38'...                   % Out 38
+            ,'Out 39'...                   % Out 39
+            ,'Out 40'...                   % Out 40
+            ,'Out 41'...                   % Out 41
+            ,'Out 42'...                   % Out 42
+            ,'Out 43'...                   % Out 43
+            ,'Out 44'...                   % Out 44
+            ,'Out 45'...                   % Out 45
+            ,'Out 46'...                   % Out 46
+            ,'Out 47'...                   % Out 47
+            ,'Out 48'...                   % Out 48
+            ,'Out 49'...                   % Out 49
+            ,'Out 50'...                   % Out 50
+            ,'Out 51'...                   % Out 51
+            ,'Out 52'...                   % Out 52
+            ,'Out 53'...                   % Out 53
+            ,'Out 54'...                   % Out 54
+            ,'Out 55'...                   % Out 55
+            ,'Out 56'...                   % Out 56
+            ,'Out 57'...                   % Out 57
+            ,'Out 58'...                   % Out 58
+            ,'Out 59'...                   % Out 59
+            ,'Out 60'...                   % Out 60
+            ,'Out 61'...                   % Out 61
+            ,'Out 62'...                   % Out 62
+            ,'Out 63'...                   % Out 63
+            ,'Out 64'...                   % Out 64
             };
         
         dig_out_init = {...
@@ -182,19 +220,51 @@ classdef Default_parameters
             ,0 ...               % Out 30
             ,1 ...               % Out 31
             ,1 ...               % Out 32
+            ,0 ...               % Out 33
+            ,0 ...               % Out 34
+            ,0 ...               % Out 35
+            ,0 ...               % Out 36
+            ,0 ...               % Out 37
+            ,0 ...               % Out 38
+            ,0 ...               % Out 39
+            ,0 ...               % Out 40
+            ,0 ...               % Out 41
+            ,0 ...               % Out 42
+            ,0 ...               % Out 43
+            ,0 ...               % Out 44
+            ,0 ...               % Out 45
+            ,0 ...               % Out 46
+            ,0 ...               % Out 47
+            ,0 ...               % Out 48
+            ,0 ...               % Out 49
+            ,0 ...               % Out 50
+            ,0 ...               % Out 51
+            ,0 ...               % Out 52
+            ,0 ...               % Out 53
+            ,0 ...               % Out 54
+            ,0 ...               % Out 55
+            ,0 ...               % Out 56
+            ,0 ...               % Out 57
+            ,0 ...               % Out 58
+            ,0 ...               % Out 59
+            ,0 ...               % Out 60
+            ,0 ...               % Out 61
+            ,0 ...               % Out 62
+            ,0 ...               % Out 63
+            ,0 ...               % Out 64
             };
         
     end
     
     properties (Constant) % Default analog outputs properties 
         
-        ana_crd = 2;         % Number of analog outputs cards
+        ana_crd = 4;         % Number of analog outputs cards
         
         ana_crd_out_nbr = 8; % Number of outputs per analog outputs card
         
-        ana_data_time_array = [3,5];
+        ana_data_time_array = [3,5,9,11];
         
-        ana_data_out_array = [4,6];
+        ana_data_out_array = [4,6,10,12];
         
         ana_out_name = {...
              '1 : Zeeman AOM freq [MHz]' ...       % Ana 1
@@ -208,11 +278,27 @@ classdef Default_parameters
             ,'9 : Repumper AOM amp'...             % Ana 9
             ,'10 : Zeeman EOM amp'...              % Ana 10
             ,'11 : Power Supply Int [A]'...        % Ana 11
-            ,'12: MOT EOM amp'...                  % Ana 12
-            ,'Ana 13'...                           % Ana 13
-            ,'Ana 14'...                           % Ana 14
+            ,'12 : MOT EOM amp'...                 % Ana 12
+            ,'13 : Ana 13'...                      % Ana 13
+            ,'14 : Ana 14'...                      % Ana 14
             ,'15 : Lock AOM eff'...                % Ana 15
             ,'16 : Zeeman AOM eff'...              % Ana 16
+            ,'17 : Ana 17' ...                     % Ana 17
+            ,'18 : Ana 18' ...                     % Ana 18
+            ,'19 : Ana 19' ...                     % Ana 19
+            ,'20 : Ana 20' ...                     % Ana 20
+            ,'21 : Ana 21' ...                     % Ana 21
+            ,'22 : Ana 22' ...                     % Ana 22
+            ,'23 : Ana 23' ...                     % Ana 23
+            ,'24 : Ana 24' ...                     % Ana 24
+            ,'25 : Ana 25'...                      % Ana 25
+            ,'26 : Ana 26'...                      % Ana 26
+            ,'27 : Ana 27'...                      % Ana 27
+            ,'28 : Ana 28'...                      % Ana 28
+            ,'29 : Ana 29'...                      % Ana 29
+            ,'30 : Ana 30'...                      % Ana 30
+            ,'31 : Ana 31'...                      % Ana 31
+            ,'32 : Ana 32'...                      % Ana 32
             };
         
         ana_out_init = {...
@@ -232,6 +318,22 @@ classdef Default_parameters
             ,0 ...                % Ana 14
             ,0.26 ...             % Ana 15
             ,1 ...                % Ana 16
+            ,0 ...                % Ana 17
+            ,0 ...                % Ana 18
+            ,0 ...                % Ana 19
+            ,0 ...                % Ana 20
+            ,0 ...                % Ana 21
+            ,0 ...                % Ana 22
+            ,0 ...                % Ana 23
+            ,0 ...                % Ana 24
+            ,0 ...                % Ana 25
+            ,0 ...                % Ana 26
+            ,0 ...                % Ana 27
+            ,0 ...                % Ana 28
+            ,0 ...                % Ana 29
+            ,0 ...                % Ana 30
+            ,0 ...                % Ana 31
+            ,0 ...                % Ana 32
             };
         
     end
@@ -255,7 +357,7 @@ classdef Default_parameters
         
         max_step_ana = 10100; % maximum number of steps of a analog sequence
         
-        t_res = 0.01; % time resolution in [ms]
+        t_res = 0.02; %0.01; % time resolution in [ms]
         
         seq_duration = 12;   % sequence total duration
         

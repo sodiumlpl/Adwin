@@ -29,6 +29,8 @@ classdef Voltage < handle
         
         behaviour    % behaviour of the voltage 'C' -> Constant, 'R' -> Ramp, 'S' -> Splines
         
+        fonction
+        
     end
     
     properties % listeners list
@@ -57,7 +59,16 @@ classdef Voltage < handle
             
             if ~isempty(obj.parent_block.asg)&&ishandle(obj.parent_block.asg.h)
                 
-                eval(['set(obj.parent_block.asg.text4',num2str(obj.out_nbr),'_',num2str(obj.voltage_nbr), ...
+                i = mod(obj.out_nbr,2*Adwin.Default_parameters.ana_crd_out_nbr);
+                if isequal(i,0)
+                    
+                    i = 2*Adwin.Default_parameters.ana_crd_out_nbr;
+
+                end
+                
+                l = (obj.out_nbr-i)/(2*Adwin.Default_parameters.ana_crd_out_nbr)+1;
+                
+                eval(['set(obj.parent_block.asg.text4',num2str(l),'_',num2str(i),'_',num2str(obj.voltage_nbr), ...
                             ',''String''              ,num2str(obj.value)', ...
                             ');']);
                 

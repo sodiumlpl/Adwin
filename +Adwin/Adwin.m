@@ -52,7 +52,7 @@ classdef Adwin < handle
     end
     
     properties % general
-       
+        
         day
         
         month
@@ -62,7 +62,7 @@ classdef Adwin < handle
     end
     
     properties (SetObservable = true)
-                
+        
         running = 0; % boolean telling if a sequence is running
         
         seq_changed = 0; % boolean checking if there has been any modification on the sequence
@@ -82,7 +82,7 @@ classdef Adwin < handle
     end
     
     properties %Network
-       
+        
         net
         
         msg  % message containing some informations about the sequence
@@ -97,7 +97,13 @@ classdef Adwin < handle
             
             obj.dig_out_init = Adwin.Default_parameters.dig_out_init;
             
-            obj.dig_out_cell = num2cell(Inf(1,Adwin.Default_parameters.dig_out_nbr));
+            obj.dig_out_cell = cell(1,Adwin.Default_parameters.dig_crd);
+            
+            for l=1:Adwin.Default_parameters.dig_crd
+                
+                obj.dig_out_cell{l} = num2cell(Inf(1,Adwin.Default_parameters.dig_out_nbr));
+                
+            end
             
             obj.ana_out_cell = cell(1,Adwin.Default_parameters.ana_crd);
             
@@ -141,22 +147,72 @@ classdef Adwin < handle
                 'TasksToExecute',floor(obj.seq_duration/Adwin.Default_parameters.pgb_duration) ...
                 );
             
-            % Initialize Adwin
-            
+            % Initialize Matlab for communication with ADwin
             ADwin_Init()
             
-            Boot('C:\ADwin\ADwin11.btl',0)
+            disp('Initialize Matlab for communication with ADwin !');
             
-            Get_Last_Error()
+            % Load operating system for the T11 processor
+            ret_val = Boot('C:\ADwin\ADwin11.btl',0);
             
-            % Load Process
+            if isequal(ret_val,8000)
+                
+                disp('Adwin boot process OK !');
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error booting Adwin - ',pErrText]);
+                
+            end
             
-            Load_Process([Adwin.Default_parameters.root_path,'adwin_processes\Init_Outputs.TB1']);
-            Load_Process([Adwin.Default_parameters.root_path,'adwin_processes\Manage_Sequences.TB2']);
+            % Load Processes
+            
+            ret_val = Load_Process([Adwin.Default_parameters.root_path,'adwin_processes\Init_Outputs.TB1']);
+            
+            if isequal(ret_val,1)
+                
+                disp('Process 1 loaded into ADwin !');
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error loading Process 1 into ADwin - ',pErrText]);
+                
+            end
+            
+            ret_val = Load_Process([Adwin.Default_parameters.root_path,'adwin_processes\Manage_Sequences.TB2']);
+            
+            if isequal(ret_val,1)
+                
+                disp('Process 2 loaded into ADwin !')
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error loading Process 2 into ADwin - ',pErrText]);
+                
+            end
             
             % Initialize Outputs
             
-            Start_Process(1);
+            ret_val = Start_Process(1);
+            
+            if ~isequal(ret_val,255)
+                
+                disp('Start Process 1 Success !')
+                disp('!! Digital outputs initialized !!');
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error Start Process 1 - ',pErrText]);
+                
+            end
             
             % Get the time resolution of the process
             
@@ -207,72 +263,72 @@ classdef Adwin < handle
             end
             
             year_dir = [Adwin.Default_parameters.data_root_path,...
-                    obj.year];
+                obj.year];
             
             if ~isdir(year_dir)
-               
+                
                 mkdir(year_dir);
                 
             end
             
             month_dir = [Adwin.Default_parameters.data_root_path,...
-                    obj.year,'\',obj.month];
+                obj.year,'\',obj.month];
             
             if ~isdir(month_dir)
-               
+                
                 mkdir(month_dir);
                 
             end
             
             day_dir = [Adwin.Default_parameters.data_root_path,...
-                    obj.year,'\',obj.month,'\',obj.day];
+                obj.year,'\',obj.month,'\',obj.day];
             
-                if ~isdir(day_dir)
-                    
-                    mkdir(day_dir);
-                    
-                end
+            if ~isdir(day_dir)
                 
-                %%% set scan count and saved sequence count
+                mkdir(day_dir);
                 
-                % scan directory
+            end
+            
+            %%% set scan count and saved sequence count
+            
+            % scan directory
+            
+            scan_dir = [Adwin.Default_parameters.data_root_path,...
+                obj.year,'\',obj.month,'\',obj.day,'\','scans'];
+            
+            if isdir(scan_dir)
                 
-                scan_dir = [Adwin.Default_parameters.data_root_path,...
-                    obj.year,'\',obj.month,'\',obj.day,'\','scans'];
+                listing = dir(scan_dir);
                 
-                if isdir(scan_dir)
-                    
-                    listing = dir(scan_dir);
-                    
-                    obj.scan_count = length(listing)-2;
-                    
-                else
-                    
-                    obj.scan_count = 0;
-                    
-                end
+                obj.scan_count = length(listing)-2;
                 
-                % saved sequence directory
+            else
                 
-                seq_dir = [Adwin.Default_parameters.data_root_path,...
-                    obj.year,'\',obj.month,'\',obj.day,'\','sequences'];
+                obj.scan_count = 0;
                 
-                if isdir(seq_dir)
-                    
-                    listing = dir(seq_dir);
-                    
-                    obj.global_saved_count = length(listing)-2;
-                    
-                else
-                    
-                    obj.global_saved_count = 0;
-                    
-                end
+            end
+            
+            % saved sequence directory
+            
+            seq_dir = [Adwin.Default_parameters.data_root_path,...
+                obj.year,'\',obj.month,'\',obj.day,'\','sequences'];
+            
+            if isdir(seq_dir)
                 
-                % create Network class
+                listing = dir(seq_dir);
                 
-                obj.net = Network.Network(obj);
+                obj.global_saved_count = length(listing)-2;
                 
+            else
+                
+                obj.global_saved_count = 0;
+                
+            end
+            
+            % create Network class
+            
+            obj.net = Network.Network(obj);
+            
         end
         
         function adwin_main_gui(obj)
@@ -724,15 +780,15 @@ classdef Adwin < handle
                     if ~isequal(sum(strcmp(evalin('base','who'),obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})),0)
                         
                         eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
-                        ');']);
+                            '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
+                            ');']);
                         
                     else
                         
                         eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,0' ...
-                        ',''Enable''               ,''off''', ...
-                        ');']);
+                            '''String''                ,0' ...
+                            ',''Enable''               ,''off''', ...
+                            ');']);
                         
                     end
                     
@@ -938,15 +994,15 @@ classdef Adwin < handle
                     if ~isequal(sum(strcmp(evalin('base','who'),obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})),0)
                         
                         eval(['set(obj.amg.edt_4_2_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})) ...
-                        ');']);
+                            '''String''                ,',num2str(evalin('base',obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})) ...
+                            ');']);
                         
                     else
                         
                         eval(['set(obj.amg.edt_4_2_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,0' ...
-                        ',''Enable''               ,''off''', ...
-                        ');']);
+                            '''String''                ,0' ...
+                            ',''Enable''               ,''off''', ...
+                            ');']);
                         
                     end
                     
@@ -1254,7 +1310,7 @@ classdef Adwin < handle
             r_wth = 0.18;
             
             obj.amg.ckb5_1 = uicontrol(...
-                 'Parent'               ,obj.amg.hsp5_1 ...
+                'Parent'               ,obj.amg.hsp5_1 ...
                 ,'Style'                ,'checkbox' ...
                 ,'Units'                ,Adwin.Default_parameters.Checkbox_Units ...
                 ,'Value'                , 0 ...
@@ -1712,8 +1768,8 @@ classdef Adwin < handle
             if ~isequal(sum(strcmp(evalin('base','who'),obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})),0)
                 
                 eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
-                        ');']);
+                    '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
+                    ');']);
                 
             end
             
@@ -1778,7 +1834,7 @@ classdef Adwin < handle
             end
             
             obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j}=eval(['get(obj.amg.edt_4_1_',num2str(i),'_',num2str(j),',''String'')']);
-                        
+            
             str=eval(['get(obj.amg.edt_4_2_',num2str(i),'_',num2str(j),',''String'')']);
             
             evalin('base',[obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j},'=',str,';']);
@@ -1818,7 +1874,7 @@ classdef Adwin < handle
                 
                 obj.block_seq_array(end).parent_adwin = obj;
                 
-                for i = 1:Adwin.Default_parameters.dig_out_nbr
+                for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr
                     
                     obj.block_seq_array(end).dig_out_struct(i).timings_array(1).state = obj.block_seq_array(end-1).dig_out_struct(i).timings_array(end).state;
                     
@@ -1830,7 +1886,7 @@ classdef Adwin < handle
                 
                 obj.block_seq_array(end).parent_adwin = obj;
                 
-                for i = 1:Adwin.Default_parameters.dig_out_nbr
+                for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr
                     
                     obj.block_seq_array(end).dig_out_struct(i).timings_array(1).state =  Adwin.Default_parameters.dig_out_init{i};
                     
@@ -1924,10 +1980,102 @@ classdef Adwin < handle
                     ,'Position'           ,[8 48 400 950] ... %,'MenuBar'     ,'none'...
                     );
                 
-                obj.iog.hsp1 = uipanel(...
+                obj.iog.tab = uitabgroup(...
                     'Parent'              ,obj.iog.h ...
-                    ,'Title'              ,'Initial Outputs' ...
-                    ,'TitlePosition'      ,'lefttop' ...
+                    ,'TabLocation'        ,'top' ...
+                    ,'Units'              ,Adwin.Default_parameters.Tab_Units ...
+                    ,'Position'           ,[0.015 0.015 0.67 0.97] ...
+                    );
+                
+                for l=1:Adwin.Default_parameters.dig_crd % go through adwin digital cards
+                    
+                    eval(['obj.iog.tab_',num2str(l),' = uitab(', ...
+                        '''Parent''              ,obj.iog.tab', ...
+                        ',''BackgroundColor''    ,Adwin.Default_parameters.Tab_BackgroundColor', ...
+                        ',''ForegroundColor''    ,Adwin.Default_parameters.Tab_ForegroundColor', ...
+                        ',''Title''              ,''Digital Card ',num2str(l),'''', ...
+                        ',''Units''              ,Adwin.Default_parameters.Tab_Units', ...
+                        ');']);
+                    
+                    for i=1:Adwin.Default_parameters.dig_out_nbr
+                        
+                        eval(['obj.iog.hsp_',num2str(l),'_',num2str(i),' = uipanel(', ...
+                            '''Parent''              ,obj.iog.tab_',num2str(l), ...
+                            ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                            ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                            ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                            ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                            ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                            ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                            ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                            ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                            ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                            ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                            ',''Position''           ,[0.0025 0.0025+(i-1)*((1-33*0.0025)/32+0.0025) 0.95 (1-33*0.0025)/32]', ...
+                            ');']);
+                        
+                        eval(['obj.iog.txt_',num2str(l),'_',num2str(i),' = uicontrol(', ...
+                            '''Parent''                ,obj.iog.hsp_',num2str(l),'_',num2str(i), ...
+                            ',''Style''                ,''text''', ...
+                            ',''String''               ,Adwin.Default_parameters.dig_out_name(i+(l-1)*Adwin.Default_parameters.dig_out_nbr)', ...
+                            ',''FontName''             ,Adwin.Default_parameters.Text_FontName', ...
+                            ',''FontSize''             ,Adwin.Default_parameters.Text_FontSize', ...
+                            ',''FontUnits''            ,Adwin.Default_parameters.Text_FontUnits', ...
+                            ',''FontWeight''           ,Adwin.Default_parameters.Text_FontWeight', ...
+                            ',''HorizontalAlignment''  ,''left''', ...
+                            ',''Units''                ,Adwin.Default_parameters.Text_Units', ...
+                            ',''Position''             ,[0.0025 0.2 0.7 0.6]', ...
+                            ');']);
+                        
+                        eval(['obj.iog.hsp2_',num2str(l),'_',num2str(i),' = uipanel(', ...
+                            '''Parent''              ,obj.iog.hsp_',num2str(l),'_',num2str(i), ...
+                            ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                            ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                            ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                            ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                            ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                            ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                            ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                            ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                            ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                            ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                            ',''Position''           ,[0.7 0.0025 0.25 0.995]', ...
+                            ');']);
+                        
+                        
+                        eval(['obj.iog.edit',num2str(l),'_',num2str(i),' = uicontrol(', ...
+                            '''Parent''               ,obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
+                            ',''Style''               ,''edit''', ...
+                            ',''String''              ,num2str(obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr})', ...
+                            ',''ForegroundColor''     ,[0,0,0]', ...
+                            ',''Units''               ,Adwin.Default_parameters.Edit_Units', ...
+                            ',''Position''            ,[0. 0.0 1.0 1.0]',  ...
+                            ',''Callback''            ,@obj.iog_edit_clb', ...
+                            ',''Tag''                 ,','''tag_',num2str(l),'_',num2str(i),'''', ...
+                            ');']);
+                        
+                        switch obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}
+                            
+                            case 1
+                                
+                                eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
+                                    ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
+                                    ');']);
+                                
+                            case 0
+                                
+                                eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
+                                    ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
+                                    ');']);
+                                
+                        end
+                        
+                    end
+                    
+                end
+                
+                obj.iog.hsp3 = uipanel(...
+                    'Parent'              ,obj.iog.h ...
                     ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
                     ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
                     ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
@@ -1938,86 +2086,12 @@ classdef Adwin < handle
                     ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
                     ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
                     ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
-                    ,'Position'           ,[0.015 0.015 0.97 0.97] ...
+                    ,'Position'           ,[0.67+0.015 0.015 0.3 0.97] ...
                     );
                 
-                for i=1:length(obj.dig_out_init)
-                    
-                    eval(['obj.iog.hsp2_',num2str(i),' = uipanel(', ...
-                        '''Parent''              ,obj.iog.hsp1', ...
-                        ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
-                        ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
-                        ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
-                        ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
-                        ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
-                        ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
-                        ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
-                        ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
-                        ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
-                        ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
-                        ',''Position''           ,[0.0025 0.0025+(i-1)*((1-33*0.0025)/32+0.0025) 0.55 (1-33*0.0025)/32]', ...
-                        ');']);
-                    
-                    eval(['obj.iog.txt_',num2str(i),' = uicontrol(', ...
-                        '''Parent''                ,obj.iog.hsp2_',num2str(i), ...
-                        ',''Style''                ,''text''', ...
-                        ',''String''               ,Adwin.Default_parameters.dig_out_name(i)', ...
-                        ',''FontName''             ,Adwin.Default_parameters.Text_FontName', ...
-                        ',''FontSize''             ,Adwin.Default_parameters.Text_FontSize', ...
-                        ',''FontUnits''            ,Adwin.Default_parameters.Text_FontUnits', ...
-                        ',''FontWeight''           ,Adwin.Default_parameters.Text_FontWeight', ...
-                        ',''HorizontalAlignment''  ,''center''', ...
-                        ',''Units''                ,Adwin.Default_parameters.Text_Units', ...
-                        ',''Position''             ,[0.0025 0.2 0.65 0.6]', ...
-                        ');']);
-                    
-                    eval(['obj.iog.hsp3_',num2str(i),' = uipanel(', ...
-                        '''Parent''              ,obj.iog.hsp2_',num2str(i), ...
-                        ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
-                        ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
-                        ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
-                        ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
-                        ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
-                        ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
-                        ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
-                        ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
-                        ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
-                        ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
-                        ',''Position''           ,[0.7 0.0025 0.25 0.995]', ...
-                        ');']);
-                    
-                    
-                    eval(['obj.iog.edit',num2str(i),' = uicontrol(', ...
-                        '''Parent''               ,obj.iog.hsp3_',num2str(i), ...
-                        ',''Style''               ,''edit''', ...
-                        ',''String''              ,num2str(obj.dig_out_init{i})', ...
-                        ',''ForegroundColor''     ,[0,0,0]', ...
-                        ',''Units''               ,Adwin.Default_parameters.Edit_Units', ...
-                        ',''Position''            ,[0. 0.0 1.0 1.0]',  ...
-                        ',''Callback''            ,@obj.iog_edit_clb', ...
-                        ',''Tag''                 ,','''tag_',num2str(i),'''', ...
-                        ');']);
-                    
-                    switch obj.dig_out_init{i}
-                        
-                        case 1
-                            
-                            eval(['set(obj.iog.hsp3_',num2str(i), ...
-                                ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
-                                ');']);
-                            
-                        case 0
-                            
-                            eval(['set(obj.iog.hsp3_',num2str(i), ...
-                                ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
-                                ');']);
-                            
-                    end
-                    
-                end
                 
                 obj.iog.but = uicontrol(...
-                    'Parent'                ,obj.iog.hsp1 ...
+                    'Parent'                ,obj.iog.hsp3 ...
                     ,'Style'                ,'pushbutton' ...
                     ,'String'               ,'set Outputs' ...
                     ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
@@ -2025,12 +2099,12 @@ classdef Adwin < handle
                     ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
                     ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
                     ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
-                    ,'Position'             ,[0.7 0.9 0.22 0.09] ...
+                    ,'Position'             ,[0.15 0.9 0.7 0.09] ...
                     ,'Callback'             ,@obj.iog_but_clb ...
                     );
                 
                 obj.iog.but2 = uicontrol(...
-                    'Parent'                ,obj.iog.hsp1 ...
+                    'Parent'                ,obj.iog.hsp3 ...
                     ,'Style'                ,'pushbutton' ...
                     ,'String'               ,'reset Outputs' ...
                     ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
@@ -2038,7 +2112,7 @@ classdef Adwin < handle
                     ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
                     ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
                     ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
-                    ,'Position'             ,[0.7 0.78 0.22 0.09] ...
+                    ,'Position'             ,[0.15 0.78 0.7 0.09] ...
                     ,'Callback'             ,@obj.iog_but2_clb ...
                     );
                 
@@ -2207,21 +2281,23 @@ classdef Adwin < handle
             
             split_tag=regexp(tag_edt,'_','split');
             
-            i=str2double(split_tag{2});
+            l=str2double(split_tag{2});
             
-            obj.dig_out_init{i}=str2double(get(gcbo,'String'));
+            i=str2double(split_tag{3});
             
-            switch obj.dig_out_init{i}
+            obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}=str2double(get(gcbo,'String'));
+            
+            switch obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}
                 
                 case 1
                     
-                    eval(['set(obj.iog.hsp3_',num2str(i), ...
+                    eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
                         ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
                         ');']);
                     
                 case 0
                     
-                    eval(['set(obj.iog.hsp3_',num2str(i), ...
+                    eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
                         ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
                         ');']);
                     
@@ -2229,7 +2305,7 @@ classdef Adwin < handle
             
             if ~isempty(obj.block_seq_array)
                 
-                obj.block_seq_array(1).dig_out_struct(i).timings_array(1).state = obj.dig_out_init{i};
+                obj.block_seq_array(1).dig_out_struct(i+(l-1)*Adwin.Default_parameters.dig_out_nbr).timings_array(1).state = obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr};
                 
             end
             
@@ -2239,21 +2315,25 @@ classdef Adwin < handle
             
             if ~obj.running
                 
-                adw_out = 0; % initial digital outputs state
-                
-                for i=1:31
+                for l=1:Adwin.Default_parameters.dig_crd % go through adwin digital cards
                     
-                    adw_out=adw_out+obj.dig_out_init{i}*2^(i-1);
+                    adw_out = 0; % initial digital outputs state
+                    
+                    for i=1:(Adwin.Default_parameters.dig_out_nbr-1)
+                        
+                        adw_out=adw_out+obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}*2^(i-1);
+                        
+                    end
+                    
+                    if isequal(obj.dig_out_init{Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr},1)
+                        
+                        adw_out=adw_out-2^(Adwin.Default_parameters.dig_out_nbr-1);
+                        
+                    end
+                    
+                    SetData_Double(Adwin.Default_parameters.dig_data_out_array(l),int32(adw_out),1);
                     
                 end
-                
-                if isequal(obj.dig_out_init{32},1)
-                    
-                    adw_out=adw_out-2^31;
-                    
-                end
-                
-                SetData_Double(2,int32(adw_out),1);
                 
                 Start_Process(1);
                 
@@ -2271,65 +2351,77 @@ classdef Adwin < handle
                 
                 obj.dig_out_init = Adwin.Default_parameters.dig_out_init;
                 
-                adw_out = 0; % initial digital outputs state
-                
-                for i=1:31
+                for l=1:Adwin.Default_parameters.dig_crd % go through adwin digital cards
                     
-                    adw_out=adw_out+obj.dig_out_init{i}*2^(i-1);
+                    adw_out = 0; % initial digital outputs state
                     
-                    switch obj.dig_out_init{i}
+                    for i=1:(Adwin.Default_parameters.dig_out_nbr-1)
+                        
+                        adw_out=adw_out+obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}*2^(i-1);
+                        
+                        eval(['set(obj.iog.edit',num2str(l),'_',num2str(i), ...
+                            ',''String''               ,num2str(obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr})', ...
+                            ');']);
+                        
+                        switch obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr}
+                            
+                            case 1
+                                
+                                eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
+                                    ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
+                                    ');']);
+                                
+                            case 0
+                                
+                                eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(i), ...
+                                    ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
+                                    ');']);
+                                
+                        end
+                        
+                        if ~isempty(obj.block_seq_array)
+                            
+                            obj.block_seq_array(1).dig_out_struct(i+(l-1)*Adwin.Default_parameters.dig_out_nbr).timings_array(1).state = obj.dig_out_init{i+(l-1)*Adwin.Default_parameters.dig_out_nbr};
+                            
+                        end
+                        
+                    end
+                    
+                    if ~isempty(obj.block_seq_array)
+                        
+                        obj.block_seq_array(1).dig_out_struct(Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr).timings_array(1).state = obj.dig_out_init{Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr};
+                        
+                    end
+                    
+                    eval(['set(obj.iog.edit',num2str(l),'_',num2str(Adwin.Default_parameters.dig_out_nbr), ...
+                        ',''String''               ,num2str(obj.dig_out_init{Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr})', ...
+                        ');']);
+                    
+                    switch obj.dig_out_init{Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr}
                         
                         case 1
                             
-                            eval(['set(obj.iog.hsp3_',num2str(i), ...
+                            eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(Adwin.Default_parameters.dig_out_nbr), ...
                                 ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
                                 ');']);
                             
                         case 0
                             
-                            eval(['set(obj.iog.hsp3_',num2str(i), ...
+                            eval(['set(obj.iog.hsp2_',num2str(l),'_',num2str(Adwin.Default_parameters.dig_out_nbr), ...
                                 ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
                                 ');']);
                             
                     end
                     
-                    if ~isempty(obj.block_seq_array)
+                    if isequal(obj.dig_out_init{Adwin.Default_parameters.dig_out_nbr+(l-1)*Adwin.Default_parameters.dig_out_nbr},1)
                         
-                        obj.block_seq_array(1).dig_out_struct(i).timings_array(1).state = obj.dig_out_init{i};
+                        adw_out=adw_out-2^(Adwin.Default_parameters.dig_out_nbr-1);
                         
                     end
                     
-                end
-                
-                if ~isempty(obj.block_seq_array)
-                    
-                    obj.block_seq_array(1).dig_out_struct(32).timings_array(1).state = obj.dig_out_init{32};
+                    SetData_Double(Adwin.Default_parameters.dig_data_out_array(l),int32(adw_out),1);
                     
                 end
-                
-                switch obj.dig_out_init{32}
-                    
-                    case 1
-                        
-                        eval(['set(obj.iog.hsp3_',num2str(32), ...
-                            ',''HighlightColor''               ,[0.0 1.0 0.0]', ...
-                            ');']);
-                        
-                    case 0
-                        
-                        eval(['set(obj.iog.hsp3_',num2str(32), ...
-                            ',''HighlightColor''               ,[1.0 0.0 0.0]', ...
-                            ');']);
-                        
-                end
-                
-                if isequal(obj.dig_out_init{32},1)
-                    
-                    adw_out=adw_out-2^31;
-                    
-                end
-                
-                SetData_Double(2,int32(adw_out),1);
                 
                 Start_Process(1);
                 
@@ -2504,14 +2596,24 @@ classdef Adwin < handle
         end
         
         function adw_timer_fcn(obj,~,~)
-
+            
             if obj.running
                 
                 % Stop Adwin process
                 
-                Stop_Process(2);
+                ret_val = Stop_Process(2);
                 
-                disp('Stop Adwin sequence');
+                if ~isequal(ret_val,255)
+                    
+                    disp('Stop Process 2 Success !')
+                    
+                else
+                    
+                    errnum = Get_Last_Error();
+                    pErrText = Get_Last_Error_Text(errnum);
+                    disp(['Error Stop Process 2 - ',pErrText])
+                    
+                end
                 
                 % Reset Scan params if Scan ended
                 
@@ -2562,7 +2664,7 @@ classdef Adwin < handle
                         obj.scan_struct = tmp_struct([tmp_struct.order]);
                         
                         if (obj.scan_repeats_nbr > 1)
-
+                            
                             str_in = ['1:',num2str(obj.scan_repeats_nbr)];
                             
                             str_out = 'x_0';
@@ -2575,7 +2677,7 @@ classdef Adwin < handle
                                 str_out = [str_out,',x_',num2str(i)];
                                 
                             end
-
+                            
                         else
                             
                             str_in = ['linspace(',num2str(obj.scan_struct(1).begin),',',num2str(obj.scan_struct(1).stop),...
@@ -2667,16 +2769,16 @@ classdef Adwin < handle
                 end
                 
             else
-                                        
+                
                 % reset scan parameters if manually stopped
                 
                 if ~isempty(obj.scan_struct)
-                        
-                        obj.scan_loop = 0;
-                        
-                        obj.scan_end = 0;
-                        
-                        obj.scan_struct = [];
+                    
+                    obj.scan_loop = 0;
+                    
+                    obj.scan_end = 0;
+                    
+                    obj.scan_struct = [];
                 end
                 
                 % check date and create date folder if needed
@@ -2794,106 +2896,142 @@ classdef Adwin < handle
                 
                 % Create a cell containing all digital outputs timings
                 
-                for j=1:length(obj.dig_out_cell)
+                for l=1:Adwin.Default_parameters.dig_crd % go through adwin digital cards
                     
-                    obj.dig_out_cell{j}=[];
-                    
-                    for i=1:length(obj.block_seq_array)
+                    for j=1:length(obj.dig_out_cell{l})
                         
-                        len_temp = length(obj.dig_out_cell{j});
+                        obj.dig_out_cell{l}{j}=[];
                         
-                        obj.dig_out_cell{j}=[obj.dig_out_cell{j},zeros(1,length(obj.block_seq_array(i).dig_out_struct(j).timings_array)-1)];
-                        
-                        for k=1:(length(obj.block_seq_array(i).dig_out_struct(j).timings_array)-1)
+                        for i=1:length(obj.block_seq_array)
                             
-                            obj.dig_out_cell{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol') + obj.block_seq_array(i).dig_out_struct(j).timings_array(k).abs_out;
+                            len_temp = length(obj.dig_out_cell{l}{j});
                             
-                        end
-                        
-                    end
-                    
-                    obj.dig_out_cell{j}=[obj.dig_out_cell{j},Inf];
-                    
-                    if (length(obj.dig_out_cell{j})>1)
-                        
-                        for k=length(obj.dig_out_cell{j}):-1:2
+                            obj.dig_out_cell{l}{j}=[obj.dig_out_cell{l}{j},zeros(1,length(obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array)-1)];
                             
-                            obj.dig_out_cell{j}(k)=obj.dig_out_cell{j}(k)-obj.dig_out_cell{j}(k-1);
+                            for k=1:(length(obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array)-1)
+                                
+                                obj.dig_out_cell{l}{j}(len_temp+k)= evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol') + obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array(k).abs_out;
+                                
+                            end
                             
                         end
+                        
+                        obj.dig_out_cell{l}{j}=[obj.dig_out_cell{l}{j},Inf];
+                        
+                        if (length(obj.dig_out_cell{l}{j})>1)
+                            
+                            for k=length(obj.dig_out_cell{l}{j}):-1:2
+                                
+                                obj.dig_out_cell{l}{j}(k)=obj.dig_out_cell{l}{j}(k)-obj.dig_out_cell{l}{j}(k-1);
+                                
+                            end
+                        end
+                        
                     end
                     
                 end
                 
                 %%% Set Digital Outputs Sequence
                 
-                adw_time_seq = zeros(1,Adwin.Default_parameters.max_step_dig); % adwin timing sequence
-                adw_out_seq = zeros(1,Adwin.Default_parameters.max_step_dig); % digital outputs state sequence
+                adw_dig_time_seq = cell(1,Adwin.Default_parameters.dig_crd); % adwin digital timing sequence
+                adw_dig_out_seq = cell(1,Adwin.Default_parameters.dig_crd); % digital outputs state sequence
                 
                 dig_out_temp = obj.dig_out_init;
                 
                 temp_cell = obj.dig_out_cell;
                 
-                index = 1;
-                
-                while ~isequal(cellfun(@(x) isequal(x,Inf),temp_cell),ones(1,32))
+                for l=1:Adwin.Default_parameters.dig_crd
                     
-                    [t,j] = min(cellfun(@(x) x(1),temp_cell));
+                    adw_dig_time_seq{l} = zeros(1,Adwin.Default_parameters.max_step_dig);
+                    adw_dig_out_seq{l} =  zeros(1,Adwin.Default_parameters.max_step_dig);
                     
-                    for i=1:32
-                        
-                        temp_cell{i}(1) = temp_cell{i}(1) - t;
-                        
-                    end
+                    index = 1;
                     
-                    adw_time_seq(index)=t;
-                    
-                    for i=1:31
+                    while ~isequal(cellfun(@(x) isequal(x,Inf),temp_cell{l}),ones(1,Adwin.Default_parameters.dig_out_nbr))
                         
-                        adw_out_seq(index)=adw_out_seq(index)+dig_out_temp{i}*2^(i-1);
+                        [t,j] = min(cellfun(@(x) x(1),temp_cell{l}));
                         
-                        if isequal(temp_cell{i}(1),0)
+                        for i=1:Adwin.Default_parameters.dig_out_nbr
                             
-                            temp_cell{i}=temp_cell{i}(2:end);
-                            
-                            dig_out_temp{i}=~dig_out_temp{i};
+                            temp_cell{l}{i}(1) = temp_cell{l}{i}(1) - t;
                             
                         end
                         
+                        adw_dig_time_seq{l}(index)=t;
+                        
+                        for i=1:(Adwin.Default_parameters.dig_out_nbr-1)
+                            
+                            adw_dig_out_seq{l}(index)=adw_dig_out_seq{l}(index)+dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+i}*2^(i-1);
+                            
+                            if isequal(temp_cell{l}{i}(1),0)
+                                
+                                temp_cell{l}{i}=temp_cell{l}{i}(2:end);
+                                
+                                dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+i}=~dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+i};
+                                
+                            end
+                            
+                        end
+                        
+                        if isequal(dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+Adwin.Default_parameters.dig_out_nbr},1)
+                            
+                            adw_dig_out_seq{l}(index)=adw_dig_out_seq{l}(index)-2^(Adwin.Default_parameters.dig_out_nbr-1);
+                            
+                        end
+                        
+                        if isequal(temp_cell{l}{Adwin.Default_parameters.dig_out_nbr}(1),0)
+                            
+                            temp_cell{l}{Adwin.Default_parameters.dig_out_nbr}=temp_cell{l}{Adwin.Default_parameters.dig_out_nbr}(2:end);
+                            
+                            dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+Adwin.Default_parameters.dig_out_nbr}=~dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+Adwin.Default_parameters.dig_out_nbr};
+                            
+                        end
+                        
+                        index=index+1;
+                        
                     end
                     
-                    if isequal(dig_out_temp{32},1)
+                    for i=1:(Adwin.Default_parameters.dig_out_nbr-1)
                         
-                        adw_out_seq(index)=adw_out_seq(index)-2^31;
-                        
-                    end
-                    
-                    if isequal(temp_cell{32}(1),0)
-                        
-                        temp_cell{32}=temp_cell{32}(2:end);
-                        
-                        dig_out_temp{32}=~dig_out_temp{32};
+                        adw_dig_out_seq{l}(index)=adw_dig_out_seq{l}(index)+dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+i}*2^(i-1);
                         
                     end
                     
-                    index=index+1;
+                    if isequal(dig_out_temp{(l-1)*Adwin.Default_parameters.dig_out_nbr+Adwin.Default_parameters.dig_out_nbr},1)
+                        
+                        adw_dig_out_seq{l}(index)=adw_dig_out_seq{l}(index)-2^(Adwin.Default_parameters.dig_out_nbr-1);
+                        
+                    end
+                    
+                    ret_val = SetData_Double(Adwin.Default_parameters.dig_data_time_array(l),int32(adw_dig_time_seq{l}),1);
+                    
+                    if ~isequal(ret_val,255)
+                        
+                        disp(['Set Data Digital Time ',num2str(l),' Success !'])
+                        
+                    else
+                        
+                        errnum = Get_Last_Error();
+                        pErrText = Get_Last_Error_Text(errnum);
+                        disp(['Error Set Data Digital Time ',num2str(l),' - ',pErrText])
+                        
+                    end
+                    
+                    SetData_Double(Adwin.Default_parameters.dig_data_out_array(l),int32(adw_dig_out_seq{l}),1);
+                    
+                    if ~isequal(ret_val,255)
+                        
+                        disp(['Set Data Digital Out ',num2str(l),' Success !'])
+                        
+                    else
+                        
+                        errnum = Get_Last_Error();
+                        pErrText = Get_Last_Error_Text(errnum);
+                        disp(['Error Set Data Digital Out ',num2str(l),' - ',pErrText])
+                        
+                    end
                     
                 end
-                
-                for i=1:31
-                    
-                    adw_out_seq(index)=adw_out_seq(index)+dig_out_temp{i}*2^(i-1);
-                    
-                end
-                
-                if isequal(dig_out_temp{32},1)
-                    
-                    adw_out_seq(index)=adw_out_seq(index)-2^31;
-                    
-                end
-                
-                SetData_Double(1,int32(adw_time_seq),1);
-                SetData_Double(2,int32(adw_out_seq),1);
                 
                 %%% Set Analog outputs sequence
                 
@@ -2904,7 +3042,7 @@ classdef Adwin < handle
                     
                     for j=1:length(obj.ana_out_cell{l}) % go through each outputs of each card
                         
-                        obj.ana_out_cell{l}{j}=[]; % output structures containing timings of analog outputs 
+                        obj.ana_out_cell{l}{j}=[]; % output structures containing timings of analog outputs
                         
                         obj.ana_volt_cell{l}{j}=[]; % output structure containing analog output voltage values
                         
@@ -2937,12 +3075,12 @@ classdef Adwin < handle
                                         
                                         if (binary_steps<ramp_steps_number)
                                             
-                                            temp_out_cell  = zeros(1,binary_steps);
+                                            temp_out_cell = zeros(1,binary_steps);
                                             
                                             temp_bin_cell = zeros(1,binary_steps);
                                             
                                             temp_bin_cell(1) = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(k).binary;
-
+                                            
                                             for m=1:(binary_steps-1)
                                                 
                                                 temp_bin_cell(m+1) = temp_bin_cell(m) + sign_steps;
@@ -2952,6 +3090,12 @@ classdef Adwin < handle
                                             end
                                             
                                             temp_out_cell(end) = ramp_steps_number;
+                                            
+                                            if ~isempty(obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous)
+                                                
+                                                temp_out_cell = temp_out_cell+obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous.abs_out;
+                                                
+                                            end
                                             
                                         else
                                             
@@ -2971,12 +3115,64 @@ classdef Adwin < handle
                                                 
                                             end
                                             
+                                            if ~isempty(obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous)
+                                                
+                                                temp_out_cell = temp_out_cell+obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous.abs_out;
+                                                
+                                            end
+                                            
                                         end
                                         
                                         obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
                                             round(evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol')) + ...
                                             temp_out_cell];
-
+                                        
+                                        obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
+                                            temp_bin_cell];
+                                        
+                                    case 'S'
+                                        
+                                        ramp_steps_number = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).out;
+                                        
+                                        if ~isempty(obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous)
+                                            
+                                            temp_out_cell = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).timings_array(k).previous.abs_out+1;
+                                            
+                                        else
+                                            
+                                            temp_out_cell = 1;
+                                            
+                                        end
+                                        
+                                        temp_bin_cell = obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(k).binary;
+                                        
+                                        for m=2:ramp_steps_number
+                                            
+                                            val = eval(['Adwin.Functions.',obj.block_seq_array(i).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(k).fonction,...
+                                                '(',num2str((m-1)/(ramp_steps_number-1)),')']);
+                                            
+                                            volt = eval(['Adwin.Calibrations.ana_out_',num2str(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr),'(',num2str(val),');']);
+                                            
+                                            binary = max(min(round(volt/(10/2^15))+2^15,2^16-1),0);
+                                            
+                                            if isequal(binary,temp_bin_cell(end))
+                                                
+                                                temp_out_cell(end) = temp_out_cell(end)+1;
+                                                
+                                            else
+                                                
+                                                temp_out_cell(end+1) = temp_out_cell(end)+1;
+                                                
+                                                temp_bin_cell(end+1) = binary;
+                                                
+                                            end
+                                            
+                                        end
+                                        
+                                        obj.ana_out_cell{l}{j}  = [obj.ana_out_cell{l}{j}, ...
+                                            round(evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol')) + ...
+                                            temp_out_cell];
+                                        
                                         obj.ana_volt_cell{l}{j} = [obj.ana_volt_cell{l}{j}, ...
                                             temp_bin_cell];
                                         
@@ -3009,7 +3205,7 @@ classdef Adwin < handle
                         %obj.ana_out_cell{l}{j}=[obj.ana_out_cell{l}{j},Inf];
                         
                         %obj.ana_volt_cell{l}{j}=[obj.ana_volt_cell{l}{j},obj.block_seq_array(end).ana_out_struct(j+(l-1)*Adwin.Default_parameters.ana_crd_out_nbr).voltages_array(end).binary];
-  
+                        
                         %%%
                         
                         if (length(obj.ana_out_cell{l}{j})>1)
@@ -3073,13 +3269,13 @@ classdef Adwin < handle
                         % new code
                         
                         [T,J] = sort(cellfun(@(x) x(1),temp_cell{l}),'ascend');
-                                                    
+                        
                         tmp_cum = cumsum(temp_cell{l}{J(1)});
                         
                         if isequal(T(2),Inf)
                             
                             tmp_len = length(temp_cell{l}{J(1)})-1;
-
+                            
                         else
                             
                             tmp_len = 2;
@@ -3105,7 +3301,7 @@ classdef Adwin < handle
                                 tmp_bin_cell{i} = temp_volt_cell{l}{i}(1:tmp_len);
                                 
                                 temp_cell{l}{i}=temp_cell{l}{i}((tmp_len+1):end);
-                                    
+                                
                                 temp_volt_cell{l}{i}=temp_volt_cell{l}{i}((tmp_len+1):end);
                                 
                             else
@@ -3162,12 +3358,37 @@ classdef Adwin < handle
                     disp(['Analog output table sent to Adwin (9 to 16) - card ',num2str(l)])
                     fprintf('%d %d %d %d %d %d %d %d \n \n',adw_ana_out_seq{l}(9:16));
                     
-                    SetData_Double(Adwin.Default_parameters.ana_data_time_array(l),int32(adw_ana_time_seq{l}),1);
-                    SetData_Double(Adwin.Default_parameters.ana_data_out_array(l),int32(adw_ana_out_seq{l}),1);
+                    ret_val = SetData_Double(Adwin.Default_parameters.ana_data_time_array(l),int32(adw_ana_time_seq{l}),1);
+                    
+                    if ~isequal(ret_val,255)
+                        
+                        disp(['Set Data Analog Time ',num2str(l),' Success !'])
+                        
+                    else
+                        
+                        errnum = Get_Last_Error();
+                        pErrText = Get_Last_Error_Text(errnum);
+                        disp(['Error Set Data Analog Time ',num2str(l),' - ',pErrText])
+                        
+                    end
+                    
+                    ret_val = SetData_Double(Adwin.Default_parameters.ana_data_out_array(l),int32(adw_ana_out_seq{l}),1);
+                    
+                    if ~isequal(ret_val,255)
+                        
+                        disp(['Set Data Analog Out ',num2str(l),' Success !'])
+                        
+                    else
+                        
+                        errnum = Get_Last_Error();
+                        pErrText = Get_Last_Error_Text(errnum);
+                        disp(['Error Set Data Analog Out ',num2str(l),' - ',pErrText])
+                        
+                    end
                     
                 end
                 
-                % Reset the seq_changed tag 
+                % Reset the seq_changed tag
                 
                 obj.seq_changed = 0;
                 
@@ -3175,10 +3396,22 @@ classdef Adwin < handle
             
             %%% Start Sequence
             
-            Start_Process(2);
+            ret_val = Start_Process(2);
+            
+            if ~isequal(ret_val,255)
+                
+                disp('Start Process 2 Success !')
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error Start Process 2 - ',pErrText])
+                
+            end
             
             if strcmp(obj.pgb_timer.running,'off')
-
+                
                 start(obj.pgb_timer);
                 
             else
@@ -3206,16 +3439,27 @@ classdef Adwin < handle
             % send message to Data-Treatment computer
             
             obj.net.send_message('BEC009',obj.msg);
-
+            
         end
         
         function adw_stop_fcn(obj,~,~)
             
             %%% stop sequence
             
-            Stop_Process(2);
+            ret_val = Stop_Process(2);
             
-            disp('!! Stop Adwin sequence !!');
+            if ~isequal(ret_val,255)
+                
+                disp('Stop Process 2 Success !');
+                disp('!! Adwin sequence stopped !!');
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error Stop Process 2 - ',pErrText]);
+                
+            end
             
             % stop progress bar
             
@@ -3227,14 +3471,25 @@ classdef Adwin < handle
             
             %%% re-initialize adwin outputs
             
-            Start_Process(1);
+            ret_val = Start_Process(1);
             
-            disp('!! Re-initialize the digital outputs !!');
+            if ~isequal(ret_val,255)
+                
+                disp('Start Process 1 Success !');
+                disp('!! Digital outputs re-initialized !!');
+                
+            else
+                
+                errnum = Get_Last_Error();
+                pErrText = Get_Last_Error_Text(errnum);
+                disp(['Error Start Process 1 - ',pErrText]);
+                
+            end
             
         end
         
         function pgb_timer_str(obj,~,~)
-                        
+            
             c_ofs = 0.;
             r_ofs = 0.;
             c_wth = 0.01;
@@ -3245,7 +3500,7 @@ classdef Adwin < handle
         end
         
         function pgb_timer_fcn(obj,~,~)
-
+            
             pos = get(obj.amg.hsp5_1_0_0,'Position');
             
             c_ofs = 0.;
@@ -3263,7 +3518,7 @@ classdef Adwin < handle
             r_ofs = 0.;
             c_wth = 1.;
             r_wth = 1.;
-
+            
             set(obj.amg.hsp5_1_0_0,'Position',[c_ofs r_ofs c_wth r_wth]);
             
         end
@@ -3290,7 +3545,13 @@ classdef Adwin < handle
             
             % reinitialize the parameters cell arrays
             
-            obj.dig_out_cell = num2cell(Inf(1,Adwin.Default_parameters.dig_out_nbr));
+            obj.dig_out_cell = cell(1,Adwin.Default_parameters.dig_crd);
+            
+            for l=1:Adwin.Default_parameters.dig_crd
+                
+                obj.dig_out_cell{l} = num2cell(Inf(1,Adwin.Default_parameters.dig_out_nbr));
+                
+            end
             
             obj.ana_out_cell = cell(1,Adwin.Default_parameters.ana_crd);
             
@@ -3595,7 +3856,7 @@ classdef Adwin < handle
                         end
                         
                         % text parameter name
-                                
+                        
                         % Panel geometry
                         
                         c_wth = 0.225;
@@ -3725,9 +3986,9 @@ classdef Adwin < handle
                             if ~isempty(obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).stop)
                                 
                                 eval(['set(obj.ssg.edt_2_',num2str(i),'_',num2str(j),',', ...
-                                '''String''                ,',num2str(obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).stop) ...
-                                ');']);
-                            
+                                    '''String''                ,',num2str(obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).stop) ...
+                                    ');']);
+                                
                             else
                                 
                                 obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).stop = ...
@@ -3966,16 +4227,16 @@ classdef Adwin < handle
                     if ~isequal(sum(strcmp(evalin('base','who'),obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})),0)
                         
                         eval(['set(obj.amg.edt_4_2_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})) ...
-                        ',''Enable''               ,''on''', ...
-                        ');']);
+                            '''String''                ,',num2str(evalin('base',obj.st_params_cell{(i-1)*Adwin.Default_parameters.nb_r_stat_params+j})) ...
+                            ',''Enable''               ,''on''', ...
+                            ');']);
                         
                     else
                         
                         eval(['set(obj.amg.edt_4_2_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,0' ...
-                        ',''Enable''               ,''off''', ...
-                        ');']);
+                            '''String''                ,0' ...
+                            ',''Enable''               ,''off''', ...
+                            ');']);
                         
                     end
                     
@@ -4045,22 +4306,22 @@ classdef Adwin < handle
                     if ~isequal(sum(strcmp(evalin('base','who'),obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})),0)
                         
                         eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
-                        ');']);
+                            '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
+                            ');']);
                         
                     else
                         
                         eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,0' ...
-                        ',''Enable''               ,''off''', ...
-                        ');']);
+                            '''String''                ,0' ...
+                            ',''Enable''               ,''off''', ...
+                            ');']);
                         
                     end
                     
                 end
                 
             end
-
+            
         end
         
         function amg_edt5_1_1_clb(obj,~,~)
@@ -4166,9 +4427,9 @@ classdef Adwin < handle
                     eval(['set(obj.ssg.edt_4_',num2str(k),'_',num2str(l),',', ...
                         '''String''                ,',num2str(obj.scans_params_struct(ind_max_order).order), ...
                         ');']);
-
+                    
             end
-
+            
         end
         
         function ssg_edt_1_clb(obj,~,~)
@@ -4242,15 +4503,15 @@ classdef Adwin < handle
                 obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).order;
             
             eval(['set(obj.ssg.edt_4_',num2str(k),'_',num2str(l),',', ...
-                        '''String''                ,',num2str(obj.scans_params_struct((k-1)*Adwin.Default_parameters.nb_r_scans_params+l).order) ...
-                        ');']);
+                '''String''                ,',num2str(obj.scans_params_struct((k-1)*Adwin.Default_parameters.nb_r_scans_params+l).order) ...
+                ');']);
             
             obj.scans_params_struct((i-1)*Adwin.Default_parameters.nb_r_scans_params+j).order = new_ord;
             
         end
         
         function ssg_closereq(obj,~,~)
-           
+            
             delete(obj.ssg.h)
             
             obj.ssg = [];
@@ -4338,7 +4599,7 @@ classdef Adwin < handle
                 dep_params(i).value = evalin('base',[dep_params(i).name,';']);
                 
             end
-
+            
         end
         
         function reset_all_formulas(obj)
@@ -4352,9 +4613,9 @@ classdef Adwin < handle
                     if ~isequal(sum(strcmp(evalin('base','who'),obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})),0)
                         
                         eval(['set(obj.amg.txt_3_',num2str(i),'_',num2str(j),',', ...
-                        '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
-                        ');']);
-                    
+                            '''String''                ,',num2str(evalin('base',obj.dep_params_cell{(i-1)*Adwin.Default_parameters.nb_r_dep_params+j})) ...
+                            ');']);
+                        
                     end
                     
                 end
@@ -4416,7 +4677,7 @@ classdef Adwin < handle
                     tmp_block.dig_out_struct(out).timings_array(end-1).formula = formula;
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).ord = length(tmp_block.dig_out_struct(out).timings_array)-1;
-                                        
+                    
                     tmp_block.dig_out_struct(out).timings_array(end-1).out_nbr = out;
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.dig_out_struct(out).timings_array(end).timing_nbr;
@@ -4442,13 +4703,13 @@ classdef Adwin < handle
                     tmp_block.dig_out_struct(out).timings_array(end-1).previous = tmp_block.dig_out_struct(out).timings_array(end-2);
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).previous.next = tmp_block.dig_out_struct(out).timings_array(end-1);
-                                        
+                    
                     tmp_block.dig_out_struct(out).timings_array(end-1).next = tmp_block.dig_out_struct(out).timings_array(end);
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).formula = formula;
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).ord = length(tmp_block.dig_out_struct(out).timings_array)-1;
-                
+                    
                     tmp_block.dig_out_struct(out).timings_array(end-1).out_nbr = out;
                     
                     tmp_block.dig_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.dig_out_struct(out).timings_array(end).timing_nbr;
@@ -4460,7 +4721,7 @@ classdef Adwin < handle
                     tmp_block.dig_out_struct(out).timings_array(end).ord = length(tmp_block.dig_out_struct(out).timings_array);
                     
                     tmp_block.dig_out_struct(out).timings_array(end).timing_nbr = tmp_block.dig_out_struct(out).timings_array(end).timing_nbr+1;
-
+                    
                 end
                 
             else
@@ -4480,11 +4741,11 @@ classdef Adwin < handle
                 tmp_block.dig_out_struct(out).timings_array(end-1).previous.next = tmp_block.dig_out_struct(out).timings_array(end-1);
                 
                 tmp_block.dig_out_struct(out).timings_array(end-1).next = tmp_block.dig_out_struct(out).timings_array(end);
-                                
+                
                 tmp_block.dig_out_struct(out).timings_array(end-1).formula = formula;
                 
                 tmp_block.dig_out_struct(out).timings_array(end-1).ord = length(tmp_block.dig_out_struct(out).timings_array)-1;
-           
+                
                 tmp_block.dig_out_struct(out).timings_array(end-1).out_nbr = out;
                 
                 tmp_block.dig_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.dig_out_struct(out).timings_array(end).timing_nbr;
@@ -4498,10 +4759,10 @@ classdef Adwin < handle
                 tmp_block.dig_out_struct(out).timings_array(end).timing_nbr = tmp_block.dig_out_struct(out).timings_array(end).timing_nbr+1;
                 
             end
-                        
+            
         end
         
-        function chge_state_ana(obj,out,blk_seq_name,time_ref_nbr,formula,value_formula,behaviour)
+        function chge_state_ana(obj,out,blk_seq_name,time_ref_nbr,formula,value_formula,behaviour,fonction)
             
             % Get the right sequence Block
             
@@ -4526,7 +4787,7 @@ classdef Adwin < handle
                     tmp_block.ana_out_struct(out).timings_array(end-1).formula = formula;
                     
                     tmp_block.ana_out_struct(out).timings_array(end-1).ord = length(tmp_block.ana_out_struct(out).timings_array)-1;
-                                        
+                    
                     tmp_block.ana_out_struct(out).timings_array(end-1).out_nbr = out;
                     
                     tmp_block.ana_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.ana_out_struct(out).timings_array(end).timing_nbr;
@@ -4552,11 +4813,11 @@ classdef Adwin < handle
                     tmp_block.ana_out_struct(out).timings_array(end-1).previous = tmp_block.ana_out_struct(out).timings_array(end-2);
                     
                     tmp_block.ana_out_struct(out).timings_array(end-1).previous.next = tmp_block.ana_out_struct(out).timings_array(end-1);
-                                        
+                    
                     tmp_block.ana_out_struct(out).timings_array(end-1).formula = formula;
                     
                     tmp_block.ana_out_struct(out).timings_array(end-1).ord = length(tmp_block.ana_out_struct(out).timings_array)-1;
-                
+                    
                     tmp_block.ana_out_struct(out).timings_array(end-1).out_nbr = out;
                     
                     tmp_block.ana_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.ana_out_struct(out).timings_array(end).timing_nbr;
@@ -4568,7 +4829,7 @@ classdef Adwin < handle
                     tmp_block.ana_out_struct(out).timings_array(end).ord = length(tmp_block.ana_out_struct(out).timings_array);
                     
                     tmp_block.ana_out_struct(out).timings_array(end).timing_nbr = tmp_block.ana_out_struct(out).timings_array(end).timing_nbr+1;
-
+                    
                 end
                 
             else
@@ -4588,11 +4849,11 @@ classdef Adwin < handle
                 tmp_block.ana_out_struct(out).timings_array(end-1).previous.next = tmp_block.ana_out_struct(out).timings_array(end-1);
                 
                 tmp_block.ana_out_struct(out).timings_array(end-1).next = tmp_block.ana_out_struct(out).timings_array(end);
-                                
+                
                 tmp_block.ana_out_struct(out).timings_array(end-1).formula = formula;
                 
                 tmp_block.ana_out_struct(out).timings_array(end-1).ord = length(tmp_block.ana_out_struct(out).timings_array)-1;
-           
+                
                 tmp_block.ana_out_struct(out).timings_array(end-1).out_nbr = out;
                 
                 tmp_block.ana_out_struct(out).timings_array(end-1).timing_nbr = tmp_block.ana_out_struct(out).timings_array(end).timing_nbr;
@@ -4621,10 +4882,12 @@ classdef Adwin < handle
             
             tmp_block.ana_out_struct(out).voltages_array(end-1).behaviour = behaviour;
             
+            tmp_block.ana_out_struct(out).voltages_array(end-1).fonction = fonction;
+            
             tmp_block.ana_out_struct(out).voltages_array(end-1).voltage_nbr = tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr;
             
             tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr = tmp_block.ana_out_struct(out).voltages_array(end).voltage_nbr+1;
-           
+            
         end
         
         function chge_end_state_ana(obj,out,blk_seq_name,value_formula)
@@ -4709,7 +4972,7 @@ classdef Adwin < handle
                     
                     fprintf(fid,['test_adwin.block_seq_array = Adwin.Block;\n\n']);
                     
-                    fprintf(fid,['for i = 1:Adwin.Default_parameters.dig_out_nbr\n\n']);
+                    fprintf(fid,['for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr\n\n']);
                     fprintf(fid,['test_adwin.block_seq_array(1).dig_out_struct(i).timings_array(1).state = Adwin.Default_parameters.dig_out_init{i};\n\n']);
                     fprintf(fid,['end\n\n']);
                     
@@ -4718,7 +4981,7 @@ classdef Adwin < handle
                     fprintf(fid,['test_adwin.block_seq_array(',num2str(l),') = Adwin.Block;\n']);
                     fprintf(fid,['test_adwin.block_seq_array(',num2str(l-1),').next = test_adwin.block_seq_array(',num2str(l),');\n\n']);
                     
-                    fprintf(fid,['for i = 1:Adwin.Default_parameters.dig_out_nbr\n\n']);
+                    fprintf(fid,['for i = 1:Adwin.Default_parameters.dig_crd*Adwin.Default_parameters.dig_out_nbr\n\n']);
                     fprintf(fid,['test_adwin.block_seq_array(',num2str(l),').dig_out_struct(i).timings_array(1).state = test_adwin.block_seq_array(',num2str(l-1),').dig_out_struct(i).timings_array(end).state;\n\n']);
                     fprintf(fid,['end\n\n']);
                     
@@ -4733,7 +4996,7 @@ classdef Adwin < handle
             end
             
             fclose(fid);
-
+            
         end
         
         function postset_seq_changed(obj,~,~)

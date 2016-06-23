@@ -120,7 +120,16 @@ classdef Timing < handle
                     
                     if ~isempty(obj.parent_block.bsg)&&ishandle(obj.parent_block.bsg.h)
                         
-                        eval(['set(obj.parent_block.bsg.text',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
+                        i = mod(obj.out_nbr,Adwin.Default_parameters.dig_out_nbr);
+                        if isequal(i,0)
+                            
+                            i = Adwin.Default_parameters.dig_out_nbr;
+
+                        end
+                        
+                        l = (obj.out_nbr-i)/(Adwin.Default_parameters.dig_out_nbr)+1;
+                        
+                        eval(['set(obj.parent_block.bsg.text',num2str(l),'_',num2str(i),'_',num2str(obj.timing_nbr), ...
                             ',''String''              ,num2str(obj.out*evalin(''base'',''Adwin_time_resol''))', ...
                             ');']);
                     end
@@ -129,7 +138,16 @@ classdef Timing < handle
                     
                     if ~isempty(obj.parent_block.asg)&&ishandle(obj.parent_block.asg.h)
                         
-                        eval(['set(obj.parent_block.asg.text3',num2str(obj.out_nbr),'_',num2str(obj.timing_nbr), ...
+                        i = mod(obj.out_nbr,2*Adwin.Default_parameters.ana_crd_out_nbr);
+                        if isequal(i,0)
+                            
+                            i = 2*Adwin.Default_parameters.ana_crd_out_nbr;
+
+                        end
+                        
+                        l = (obj.out_nbr-i)/(2*Adwin.Default_parameters.ana_crd_out_nbr)+1;
+                        
+                        eval(['set(obj.parent_block.asg.text3',num2str(l),'_',num2str(i),'_',num2str(obj.timing_nbr), ...
                             ',''String''              ,num2str(obj.out*evalin(''base'',''Adwin_time_resol''))', ...
                             ');']);
                     end
