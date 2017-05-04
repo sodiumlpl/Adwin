@@ -4,129 +4,93 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-test_adwin.st_params_cell{1}='AOM_MOT_eff';
+test_adwin.st_params_cell{1}='step1_time';
 
-AOM_MOT_eff=1;
+step1_time=250;
 
-test_adwin.st_params_cell{2}='AOM_MOT_freq';
+test_adwin.st_params_cell{2}='step2_time';
 
-AOM_MOT_freq=296;
+step2_time=500;
 
-test_adwin.st_params_cell{3}='AOM_Repumper_eff';
+test_adwin.st_params_cell{3}='step3_time';
 
-AOM_Repumper_eff=1;
+step3_time=500;
 
-test_adwin.st_params_cell{4}='AOM_Repumper_freq';
+test_adwin.st_params_cell{4}='step4_time';
 
-AOM_Repumper_freq=1.771;
+step4_time=500;
 
-test_adwin.st_params_cell{5}='AOM_Zeeman_eff';
+test_adwin.st_params_cell{5}='step5_time';
 
-AOM_Zeeman_eff=1;
+step5_time=500;
 
-test_adwin.st_params_cell{6}='AOM_Zeeman_freq';
+test_adwin.st_params_cell{6}='step6_time';
 
-AOM_Zeeman_freq=311;
+step6_time=250;
 
-test_adwin.st_params_cell{7}='AOM_imag_eff';
+test_adwin.st_params_cell{7}='step7_time';
 
-AOM_imag_eff=0.8;
+step7_time=500;
 
-test_adwin.st_params_cell{8}='AOM_imag_freq';
+test_adwin.st_params_cell{8}='step8_time';
 
-AOM_imag_freq=307;
+step8_time=100;
 
-test_adwin.st_params_cell{9}='DelayPic';
+test_adwin.st_params_cell{9}='step9_time';
 
-DelayPic=0.2;
+step9_time=100;
 
-test_adwin.st_params_cell{10}='DelayPixelfly';
+test_adwin.st_params_cell{10}='step10_time';
 
-DelayPixelfly=0.01;
+step10_time=100;
 
-test_adwin.st_params_cell{11}='DelayShutter';
+test_adwin.st_params_cell{11}='step11_time';
 
-DelayShutter=2.2;
+step11_time=100;
 
-test_adwin.st_params_cell{12}='DelayShutterImaging';
+test_adwin.st_params_cell{12}='step12_time';
 
-DelayShutterImaging=1.7;
+step12_time=100;
 
-test_adwin.st_params_cell{13}='DelayShutterMech';
+test_adwin.st_params_cell{13}='step13_time';
 
-DelayShutterMech=200;
+step13_time=100;
 
-test_adwin.st_params_cell{14}='DelayShutterRepump';
+test_adwin.st_params_cell{14}='step14_time';
 
-DelayShutterRepump=1.1;
+step14_time=100;
 
-test_adwin.st_params_cell{15}='DelayZeemanPulse';
+test_adwin.st_params_cell{15}='step15_time';
 
-DelayZeemanPulse=1;
+step15_time=100;
 
-test_adwin.st_params_cell{16}='EOM_MOT_amp';
+test_adwin.st_params_cell{16}='init_time';
 
-EOM_MOT_amp=1;
+init_time=250;
 
-test_adwin.st_params_cell{17}='EOM_MOT_freq';
+test_adwin.st_params_cell{17}='max_curr';
 
-EOM_MOT_freq=1.711;
+max_curr=10;
 
-test_adwin.st_params_cell{18}='EOM_Zeeman_amp';
+test_adwin.st_params_cell{18}='pulse_time';
 
-EOM_Zeeman_amp=1;
+pulse_time=2;
 
-test_adwin.st_params_cell{19}='EOM_Zeeman_freq';
+test_adwin.st_params_cell{19}='c_hold_time';
 
-EOM_Zeeman_freq=1.771;
+c_hold_time=100;
 
-test_adwin.st_params_cell{20}='Expo_time';
+test_adwin.st_params_cell{20}='c_hold_time2';
 
-Expo_time=137;
+c_hold_time2=60;
 
-test_adwin.st_params_cell{21}='Hold_time';
+test_adwin.st_params_cell{21}='mag_trap_time';
 
-Hold_time=100;
+mag_trap_time=200;
 
-test_adwin.st_params_cell{22}='Life_time';
+test_adwin.st_params_cell{22}='back_step_time';
 
-Life_time=0;
-
-test_adwin.st_params_cell{23}='MOT_loading_time';
-
-MOT_loading_time=3000;
-
-test_adwin.st_params_cell{24}='PixelflyAcq';
-
-PixelflyAcq=150;
-
-test_adwin.st_params_cell{25}='PulseLength';
-
-PulseLength=0.01;
-
-test_adwin.st_params_cell{26}='Reset_time';
-
-Reset_time=250;
-
-test_adwin.st_params_cell{27}='Switch_II_cur';
-
-Switch_II_cur=5;
-
-test_adwin.st_params_cell{28}='TOF_time';
-
-TOF_time=4;
-
-test_adwin.st_params_cell{29}='Zeeman_rep_eff';
-
-Zeeman_rep_eff=1;
-
-test_adwin.st_params_cell{30}='Zeeman_rep_freq';
-
-Zeeman_rep_freq=271;
-
-test_adwin.st_params_cell{31}='cnt';
-
-cnt=20;
+back_step_time=20;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

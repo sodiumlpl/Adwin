@@ -1,25 +1,20 @@
 function voltage = ana_out_5(value)
 
-%-----Location of the data files-----%
-path = 'C:\Users\BEC\Documents\data\2014\09\30\';
-name = 'efficiency_vs_analogic_voltage_AOM_300MHz_1004.txt'; % AOM Imaging
-filename = strcat(path,name);
+%-----Calibration data 04/07/2016-----%
 
-%-----Importation of the data-----%
-datafile = importdata(filename);
-data     = datafile.data;
-headers  = datafile.textdata;
+% volt = [4 5 5.5 5.6 5.7 5.8 5.9 6 6.1 6.2 6.3 6.4 6.5 6.6];
+% amp = [328e-3 545e-3 3.59 5.62 8.69 13.2 19.5 27.8 37.9 49.2 59.8 69 74.7 75.7]/75.7;
+
+volt = [5.3 5.5 5.6 5.7 5.8 5.9 6 6.1 6.2 6.3 6.4 6.6];
+amp = [0 3.59 5.62 8.69 13.2 19.5 27.8 37.9 49.2 59.8 69 75.7]/75.7;
 
 %-----Spline interpolation-----%
-data(:,2) = data(:,2)/max(data(:,2));
+pp = spline(amp,volt);
+v = ppval(pp,value);
 
-minVal  = min(data(:,2));
-maxVal  = max(data(:,2));
-value   = (value<minVal)*minVal + (minVal<=value & value<=maxVal)*value + (value>maxVal)*maxVal;
-pp      = spline(data(:,2),data(:,1));
-v       = ppval(pp,value);
-voltage = (3.5<=v & v<=9.99)*v + (v>9.99)*9.99; % Keeps the voltage in the range [3.5 V; 9.99 V]
+%-----Output value-----%
+voltage = (4<=v & v<=6.6)*v + (v>6.6)*6.6; % Keeps the voltage in the range [6.5 V; 10 V]
 
-% voltage = value;
+%voltage = value;
 
 end

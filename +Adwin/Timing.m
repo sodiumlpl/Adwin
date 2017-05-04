@@ -22,8 +22,6 @@ classdef Timing < handle
         
         out            % Timing (from the previous Timing)
         
-        ord
-        
         out_nbr        % Number of the Adwin output
         
         timing_nbr     % Number of the Timing within the Block

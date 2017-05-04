@@ -1,19 +1,15 @@
 function voltage = ana_out_1(value)
-    %-----Location of the data files-----%
-    path = 'C:\Users\BEC\Documents\data\2014\07\09\';
-    name = 'freq_vs_analogic_voltage_AOM_300MHz_1002.txt'; % AOM Zeeman
-    filename = strcat(path,name);
 
-    %-----Importation of the data-----%
-    datafile = importdata(filename);
-    data     = datafile.data;
-    headers  = datafile.textdata;
-    
-    %-----Spline interpolation-----%
-    minVal  = min(data(:,2));
-    maxVal  = max(data(:,2));
-    value   = (value<minVal)*minVal + (minVal<=value & value<=maxVal)*value + (value>maxVal)*maxVal;
-    pp      = spline(data(:,2),data(:,1));
-    v       = ppval(pp,value);
-    voltage = (0<=v & v<=10)*v + (v>10)*10; % Keeps the voltage in the range [0 V; 10 V]
+%-----Calibration data 04/07/2016-----%
+volt = 0:0.5:10;
+freq = [129.57 134.65 141.91 148.39 154.22 159.70 165.04 170.30 175.52 ...
+    180.87 186.54 192.45 198.37 204.10 210.15 216.71 223.28 229.67 235.63 241.21 247.43];
+
+%-----Spline interpolation-----%
+pp = spline(freq,volt);
+v = ppval(pp,value);
+
+%-----Output value-----%
+voltage = (0<=v & v<=10)*v + (v>10)*10; % Keeps the voltage in the range [0 V; 10 V]
+
 end

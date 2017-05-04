@@ -25,7 +25,7 @@ classdef Voltage < handle
         
         out_nbr      % corresponding analog output for this voltage
         
-        voltage_nbr     % Number of the Timing within the Block
+        voltage_nbr  % Number of the Timing within the Block
         
         behaviour    % behaviour of the voltage 'C' -> Constant, 'R' -> Ramp, 'S' -> Splines
         

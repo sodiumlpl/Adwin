@@ -123,23 +123,23 @@ classdef Default_parameters
         dig_out_name = {...
              '1 : AOM Zeeman'...           % Out 1
             ,'2 : AOM MOT'...              % Out 2
-            ,'3 : AOM Imaging'...          % Out 3
-            ,'4 : Zeeman Shutter'...       % Out 4
-            ,'5 : MOT Shutter'...          % Out 5
-            ,'6 : Imaging Shutter'...      % Out 6
-            ,'7 : Repumper Shutter'...     % Out 7
-            ,'Out 8'...                    % Out 8
-            ,'9 : Transport inhib 2'...    % Out 9
+            ,'3 : AOM Rep+Pol'...          % Out 3
+            ,'Out 4'...                    % Out 4
+            ,'Out 5'...                    % Out 5
+            ,'Out 6'...                    % Out 6
+            ,'Out 7'...                    % Out 7
+            ,'8 : AOM 1.7GHz'...           % Out 8
+            ,'9 : Current Supply 2'...     % Out 9
             ,'Out 10'...                   % Out 10
             ,'Out 11'...                   % Out 11
             ,'Out 12'...                   % Out 12
             ,'13 : Camera Trigger'...      % Out 13
             ,'Out 14'...                   % Out 14
-            ,'Out 15'...                   % Out 15
-            ,'16 : AOM 200 MHz'...         % Out 16
-            ,'Out 17'...                   % Out 17
-            ,'Out 18'...                   % Out 18
-            ,'Out 19'...                   % Out 19
+            ,'15 : Current Supply 1'...                   % Out 15
+            ,'Out 16'...                   % Out 16
+            ,'17 : Current Supply 3'...    % Out 17
+            ,'18 : Mag. trans. clock'...   % Out 18
+            ,'19 : Mag. trans. dir.'...    % Out 19
             ,'Out 20'...                   % Out 20
             ,'Out 21'...                   % Out 21
             ,'Out 22'...                   % Out 22
@@ -151,12 +151,12 @@ classdef Default_parameters
             ,'Out 28'...                   % Out 28
             ,'Out 29'...                   % Out 29
             ,'30 : Mechanical Shutter'...  % Out 30
-            ,'31 : AOM 200 MHz'...         % Out 31
-            ,'32 : AOMs On'...             % Out 32
-            ,'Out 33'...                   % Out 33
-            ,'Out 34'...                   % Out 34
-            ,'Out 35'...                   % Out 35
-            ,'Out 36'...                   % Out 36
+            ,'Out 31'...                   % Out 31
+            ,'Out 32'...                   % Out 32
+            ,'33 : Rep+Pol Shutter'...     % Out 33
+            ,'34 : MOT Shutter'...         % Out 34
+            ,'35 : Imaging Shutter'...     % Out 35
+            ,'36 : Zeeman Shutter'...      % Out 36
             ,'Out 37'...                   % Out 37
             ,'Out 38'...                   % Out 38
             ,'Out 39'...                   % Out 39
@@ -195,7 +195,7 @@ classdef Default_parameters
             ,0 ...                % Out 5
             ,0 ...                % Out 6
             ,0 ...                % Out 7
-            ,0 ...                % Out 8
+            ,1 ...                % Out 8
             ,0 ...                % Out 9
             ,0 ...               % Out 10
             ,0 ...               % Out 11
@@ -203,10 +203,10 @@ classdef Default_parameters
             ,0 ...               % Out 13
             ,0 ...               % Out 14
             ,0 ...               % Out 15
-            ,1 ...               % Out 16
+            ,0 ...               % Out 16
             ,0 ...               % Out 17
             ,0 ...               % Out 18
-            ,0 ...               % Out 19
+            ,1 ...               % Out 19
             ,0 ...               % Out 20
             ,0 ...               % Out 21
             ,0 ...               % Out 22
@@ -218,8 +218,8 @@ classdef Default_parameters
             ,0 ...               % Out 28
             ,0 ...               % Out 29
             ,0 ...               % Out 30
-            ,1 ...               % Out 31
-            ,1 ...               % Out 32
+            ,0 ...               % Out 31
+            ,0 ...               % Out 32
             ,0 ...               % Out 33
             ,0 ...               % Out 34
             ,0 ...               % Out 35
@@ -269,22 +269,22 @@ classdef Default_parameters
         ana_out_name = {...
              '1 : Zeeman AOM freq [MHz]' ...       % Ana 1
             ,'2 : MOT AOM freq [MHz]' ...          % Ana 2
-            ,'3 : Imaging AOM freq [MHz]' ...      % Ana 3
+            ,'3 : Rep+Pol AOM freq [MHz]' ...      % Ana 3
             ,'4 : MOT AOM eff' ...                 % Ana 4
-            ,'5 : Imaging AOM eff' ...             % Ana 5
+            ,'5 : Rep+Pol AOM eff' ...             % Ana 5
             ,'6 : MOT EOM freq [GHz]' ...          % Ana 6
-            ,'7 : Repumper AOM freq [GHz]' ...     % Ana 7
-            ,'8 : Zeeman EOM freq [GHz]' ...       % Ana 8
-            ,'9 : Repumper AOM amp'...             % Ana 9
-            ,'10 : Zeeman EOM amp'...              % Ana 10
-            ,'11 : Power Supply Int [A]'...        % Ana 11
+            ,'7 : AOM 1.7GHz freq [GHz]' ...       % Ana 7
+            ,'8 : Rep+Pol EOM freq [GHz]' ...      % Ana 8
+            ,'9 : AOM 1.7GHz amp'...               % Ana 9
+            ,'10 : Rep+Pol EOM amp'...             % Ana 10
+            ,'11 : Current Supply II [A]'...       % Ana 11
             ,'12 : MOT EOM amp'...                 % Ana 12
-            ,'13 : Ana 13'...                      % Ana 13
-            ,'14 : Ana 14'...                      % Ana 14
-            ,'15 : Lock AOM eff'...                % Ana 15
+            ,'13 : Current Supply I [A]'...        % Ana 13
+            ,'14 : Current Supply II [V]'...       % Ana 14
+            ,'15 : Current Supply III [A]'...      % Ana 15
             ,'16 : Zeeman AOM eff'...              % Ana 16
-            ,'17 : Ana 17' ...                     % Ana 17
-            ,'18 : Ana 18' ...                     % Ana 18
+            ,'17 : Current Supply I [V]' ...       % Ana 17
+            ,'18 : Current Supply III [V]' ...     % Ana 18
             ,'19 : Ana 19' ...                     % Ana 19
             ,'20 : Ana 20' ...                     % Ana 20
             ,'21 : Ana 21' ...                     % Ana 21
@@ -302,21 +302,21 @@ classdef Default_parameters
             };
         
         ana_out_init = {...
-             295.3 ...            % Ana 1
-            ,307 ...              % Ana 2
-            ,287.3 ...            % Ana 3
+             200 ...              % Ana 1
+            ,117.5 ...            % Ana 2
+            ,100 ...              % Ana 3
             ,1 ...                % Ana 4
             ,1 ...                % Ana 5
-            ,1.71 ...             % Ana 6
+            ,1.711 ...            % Ana 6
             ,1.71 ...             % Ana 7
-            ,1.71 ...             % Ana 8
+            ,1.771 ...            % Ana 8
             ,1 ...                % Ana 9
             ,1 ...                % Ana 10
             ,0 ...                % Ana 11
             ,0 ...                % Ana 12
             ,0 ...                % Ana 13
             ,0 ...                % Ana 14
-            ,0.26 ...             % Ana 15
+            ,0 ...                % Ana 15
             ,1 ...                % Ana 16
             ,0 ...                % Ana 17
             ,0 ...                % Ana 18
