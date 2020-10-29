@@ -682,6 +682,8 @@ classdef MWparams < handle
                
                set(obj.parent_adwin.srf.txt15,'String',obj.level_formula)
                
+               %test
+               
            end
 
         end
