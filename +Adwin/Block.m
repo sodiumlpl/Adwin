@@ -90,7 +90,7 @@ classdef Block < handle
             
             timings_array_init=cell(1,Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr);
             
-            for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr;
+            for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr
                 
                 timings_array_init{i} = Adwin.Timing;
                 
@@ -114,7 +114,7 @@ classdef Block < handle
             
             voltages_array_init=cell(1,Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr);
             
-            for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr;
+            for i =1:Adwin.Default_parameters.ana_crd*Adwin.Default_parameters.ana_crd_out_nbr
                 
                 voltages_array_init{i} = Adwin.Voltage;
                 
@@ -970,7 +970,7 @@ classdef Block < handle
                 obj.ebg.txt3 = uicontrol(...
                     'Parent'                ,obj.ebg.hsp1 ...
                     ,'Style'                ,'text' ...
-                    ,'String'               ,'Inhibate block' ...
+                    ,'String'               ,'Inhibit block' ...
                     ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
                     ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
                     ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...

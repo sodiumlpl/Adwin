@@ -12,5 +12,6 @@ v = ppval(pp,value);
 
 %-----Output value-----%
 voltage = (4<=v & v<=7.7)*v + (v>7.7)*7.7; % Keeps the voltage in the range [4 V; 7.7 V]
+%voltage = value;
 
 end

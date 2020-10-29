@@ -1,5 +1,10 @@
 function voltage = ana_out_14(value)
 
-voltage = (0<=value & value<=15.34)*(value/(15.34/(10+0.02))-0.02) + (value<0)*-0.02 + (value>15.34)*10;
+ofs = -0.04;
+Vmax = 15.35;
+
+voltage = (0<=value & value<=Vmax)*(value/(Vmax/(10-ofs))+ofs) + (value<0)*ofs + (value>Vmax)*10;
+
+%voltage = value;
 
 end

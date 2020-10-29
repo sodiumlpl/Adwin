@@ -7,7 +7,9 @@ classdef Default_parameters
         root_path = 'C:\Users\BEC\Documents\MATLAB\13_Adwin\';
         data_root_path = 'C:\Users\BEC\Documents\data\';
         
-        params_path = '\\TIBO-HP\Data\Tmp\';
+        tabor_data_path = '\\BEC009-T3600\Users\BEC\Documents\MATLAB\20\09_tabor\';
+        
+        params_path = '\\E010-BEC-PC03\Data\Tmp\';
         
     end
     
@@ -124,22 +126,22 @@ classdef Default_parameters
              '1 : AOM Zeeman'...           % Out 1
             ,'2 : AOM MOT'...              % Out 2
             ,'3 : AOM Rep+Pol'...          % Out 3
-            ,'Out 4'...                    % Out 4
+            ,'4 : EOM MOT'...              % Out 4
             ,'Out 5'...                    % Out 5
             ,'Out 6'...                    % Out 6
             ,'Out 7'...                    % Out 7
-            ,'8 : AOM 1.7GHz'...           % Out 8
+            ,'8 : AOM 1.7 GHz'...          % Out 8
             ,'9 : Current Supply 2'...     % Out 9
             ,'Out 10'...                   % Out 10
             ,'Out 11'...                   % Out 11
-            ,'Out 12'...                   % Out 12
-            ,'13 : Camera Trigger'...      % Out 13
+            ,'12 : Pixelfly Trigger'...    % Out 12
+            ,'13 : ImagSource Trigger'...  % Out 13
             ,'Out 14'...                   % Out 14
-            ,'15 : Current Supply 1'...                   % Out 15
+            ,'15 : Current Supply 1'...    % Out 15
             ,'Out 16'...                   % Out 16
             ,'17 : Current Supply 3'...    % Out 17
-            ,'18 : Mag. trans. clock'...   % Out 18
-            ,'19 : Mag. trans. dir.'...    % Out 19
+            ,'18 : Transport clock'...     % Out 18
+            ,'19 : Transport direction'... % Out 19
             ,'Out 20'...                   % Out 20
             ,'Out 21'...                   % Out 21
             ,'Out 22'...                   % Out 22
@@ -157,8 +159,8 @@ classdef Default_parameters
             ,'34 : MOT Shutter'...         % Out 34
             ,'35 : Imaging Shutter'...     % Out 35
             ,'36 : Zeeman Shutter'...      % Out 36
-            ,'Out 37'...                   % Out 37
-            ,'Out 38'...                   % Out 38
+            ,'37 : Trigger SMC100A'...     % Out 37
+            ,'38 : Trigger Tabor evap'...  % Out 38
             ,'Out 39'...                   % Out 39
             ,'Out 40'...                   % Out 40
             ,'Out 41'...                   % Out 41
@@ -191,11 +193,11 @@ classdef Default_parameters
              1 ...                % Out 1
             ,1 ...                % Out 2
             ,1 ...                % Out 3
-            ,0 ...                % Out 4
+            ,1 ...                % Out 4
             ,0 ...                % Out 5
             ,0 ...                % Out 6
             ,0 ...                % Out 7
-            ,1 ...                % Out 8
+            ,0 ...                % Out 8
             ,0 ...                % Out 9
             ,0 ...               % Out 10
             ,0 ...               % Out 11
@@ -275,24 +277,24 @@ classdef Default_parameters
             ,'6 : MOT EOM freq [GHz]' ...          % Ana 6
             ,'7 : AOM 1.7GHz freq [GHz]' ...       % Ana 7
             ,'8 : Rep+Pol EOM freq [GHz]' ...      % Ana 8
-            ,'9 : AOM 1.7GHz amp'...               % Ana 9
-            ,'10 : Rep+Pol EOM amp'...             % Ana 10
-            ,'11 : Current Supply II [A]'...       % Ana 11
-            ,'12 : MOT EOM amp'...                 % Ana 12
-            ,'13 : Current Supply I [A]'...        % Ana 13
-            ,'14 : Current Supply II [V]'...       % Ana 14
-            ,'15 : Current Supply III [A]'...      % Ana 15
+            ,'9 : AOM 1.7GHz eff'...               % Ana 9
+            ,'10 : Rep+Pol EOM eff'...             % Ana 10
+            ,'11 : Current Supply 2 [A]'...        % Ana 11
+            ,'12 : MOT EOM eff'...                 % Ana 12
+            ,'13 : Current Supply 1 [A]'...        % Ana 13
+            ,'14 : Current Supply 2 [V]'...        % Ana 14
+            ,'15 : Current Supply 3 [A]'...        % Ana 15
             ,'16 : Zeeman AOM eff'...              % Ana 16
-            ,'17 : Current Supply I [V]' ...       % Ana 17
-            ,'18 : Current Supply III [V]' ...     % Ana 18
-            ,'19 : Ana 19' ...                     % Ana 19
-            ,'20 : Ana 20' ...                     % Ana 20
-            ,'21 : Ana 21' ...                     % Ana 21
-            ,'22 : Ana 22' ...                     % Ana 22
-            ,'23 : Ana 23' ...                     % Ana 23
-            ,'24 : Ana 24' ...                     % Ana 24
-            ,'25 : Ana 25'...                      % Ana 25
-            ,'26 : Ana 26'...                      % Ana 26
+            ,'17 : Current Supply 1 [V]' ...       % Ana 17
+            ,'18 : Current Supply 3 [V]' ...       % Ana 18
+            ,'19 : SM 52-30 [A]' ...               % Ana 19
+            ,'20 : SM 52-30 [V]' ...               % Ana 20
+            ,'21 : SM 70-22 [A]' ...               % Ana 21
+            ,'22 : SM 70-22 [V]' ...               % Ana 22
+            ,'23 : SM 70-AR-24 [A]' ...            % Ana 23
+            ,'24 : SM 70-AR-24 [V]' ...            % Ana 24
+            ,'25 : SM 15-100 [A]'...               % Ana 25
+            ,'26 : SM 15-100 [V]'...               % Ana 26
             ,'27 : Ana 27'...                      % Ana 27
             ,'28 : Ana 28'...                      % Ana 28
             ,'29 : Ana 29'...                      % Ana 29
@@ -302,17 +304,17 @@ classdef Default_parameters
             };
         
         ana_out_init = {...
-             200 ...              % Ana 1
-            ,117.5 ...            % Ana 2
-            ,100 ...              % Ana 3
+             193 ...              % Ana 1
+            ,116.5 ...            % Ana 2
+            ,90 ...               % Ana 3
             ,1 ...                % Ana 4
             ,1 ...                % Ana 5
             ,1.711 ...            % Ana 6
             ,1.71 ...             % Ana 7
             ,1.771 ...            % Ana 8
             ,1 ...                % Ana 9
-            ,1 ...                % Ana 10
-            ,0 ...                % Ana 11
+            ,0.5 ...              % Ana 10
+            ,3.75 ...             % Ana 11
             ,0 ...                % Ana 12
             ,0 ...                % Ana 13
             ,0 ...                % Ana 14
@@ -355,13 +357,23 @@ classdef Default_parameters
         
         max_step_dig = 101; % maximum number of steps of a digital sequence
         
-        max_step_ana = 10100; % maximum number of steps of a analog sequence
-        
-        t_res = 0.02; %0.01; % time resolution in [ms]
+        max_step_ana = 1010000; % maximum number of steps of a analog sequence
         
         seq_duration = 12;   % sequence total duration
         
         pgb_duration = 1; % duration of each step of the progress bar
+        
+    end
+    
+    properties (Constant) % MW parameters
+        
+        mw_start_freq = 1610; % [MHz]
+        mw_stop_freq = 1600; % [MHz]
+        
+        mw_sweep_duration = 100; % [ms]
+        mw_sweep_points = 100;
+        
+        mw_level = 0; % [dBm]
         
     end
     

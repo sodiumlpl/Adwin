@@ -13,6 +13,8 @@ classdef Adwin < handle
         
         ssg     % set scans gui
         
+        srf     % set RF & MW gui
+        
     end
     
     properties % block sequence properties
@@ -21,10 +23,26 @@ classdef Adwin < handle
         
     end
     
+    properties % RF timings properties
+       
+        rf_timings_array
+        
+        rf_seq_changed
+        
+    end
+    
+    properties % MW properties
+        
+        mw_params
+        
+        mw_seq_changed
+        
+    end
+    
     properties % Sequences
         
         dig_out_init  % array containing the initial values of the digital outputs
-        dig_out_cell % cell containing the digital outputs timing sequence
+        dig_out_cell  % cell containing the digital outputs timing sequence
         
         ana_out_cell  % cell containing the analog outputs timing sequence
         ana_volt_cell % cell containing the analog outputs voltage sequence
@@ -563,6 +581,26 @@ classdef Adwin < handle
                 ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
                 ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
                 ,'Callback'             ,@obj.amg_but2_7_clb ...
+                );
+            
+            % pushbutton 2_8 geometry
+            
+            c_ofs = 2*0.01+2*7*(0.05+0.01);
+            r_ofs = 0.075;
+            c_wth = 2*0.05;
+            r_wth = 0.85;
+            
+            obj.amg.but2_8 = uicontrol(...
+                'Parent'                ,obj.amg.hsp2 ...
+                ,'Style'                ,'pushbutton' ...
+                ,'String'               ,'set RF & MW' ...
+                ,'FontName'             ,Adwin.Default_parameters.Pushbutton_FontName ...
+                ,'FontSize'             ,Adwin.Default_parameters.Pushbutton_FontSize ...
+                ,'FontUnits'            ,Adwin.Default_parameters.Pushbutton_FontUnits ...
+                ,'FontWeight'           ,Adwin.Default_parameters.Pushbutton_FontWeight ...
+                ,'Units'                ,Adwin.Default_parameters.Pushbutton_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.amg_but2_8_clb ...
                 );
             
             %%% Dependent Parameters panel %%%
@@ -2911,7 +2949,7 @@ classdef Adwin < handle
                                 
                                 if isequal(mod(length(obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array),2),0)
                                     
-                                    obj.dig_out_cell{l}{j}=[obj.dig_out_cell{l}{j},round(evalin('base',obj.block_seq_array(i+1).t_start)/evalin('base','Adwin_time_resol'))-obj.block_inhib_struct(i).timing];
+                                    obj.dig_out_cell{l}{j}=[obj.dig_out_cell{l}{j},round(evalin('base',obj.block_seq_array(i+1).t_start)/evalin('base','Adwin_time_resol'))-obj.block_inhib_struct(i+1).timing];
                                     
                                     if (length(obj.dig_out_cell{l}{j})>1)&&isequal(obj.dig_out_cell{l}{j}(end-1),obj.dig_out_cell{l}{j}(end))
                                         
@@ -2930,7 +2968,7 @@ classdef Adwin < handle
                                 for k=1:(length(obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array)-1)
                                     
                                     obj.dig_out_cell{l}{j}(len_temp+k)= round(evalin('base',obj.block_seq_array(i).t_start)/evalin('base','Adwin_time_resol')) +...
-                                        obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array(k).abs_out -...
+                                        obj.block_seq_array(i).dig_out_struct((l-1)*Adwin.Default_parameters.dig_out_nbr+j).timings_array(k).abs_out ...
                                         -obj.block_inhib_struct(i).timing;
                                     
                                 end
@@ -3305,106 +3343,179 @@ classdef Adwin < handle
                 adw_ana_time_seq = cell(1,Adwin.Default_parameters.ana_crd); % adwin analog outputs timing sequence
                 adw_ana_out_seq = cell(1,Adwin.Default_parameters.ana_crd); % analog outputs state sequence
                 
-                temp_cell = obj.ana_out_cell;
+                %%% old code part 1 %%%
                 
-                temp_volt_cell = obj.ana_volt_cell;
+%                 temp_cell = obj.ana_out_cell;
+%                 
+%                 temp_volt_cell = obj.ana_volt_cell;
+                
+                %%% end old code part 1 %%%
                 
                 for l=1:Adwin.Default_parameters.ana_crd
                     
-                    adw_ana_time_seq{l} = zeros(1,Adwin.Default_parameters.max_step_ana);
+                    %adw_ana_time_seq{l} = zeros(1,Adwin.Default_parameters.max_step_ana);
                     
-                    adw_ana_out_seq{l} = 32768*ones(1,4*Adwin.Default_parameters.max_step_ana)-2^31;
+                    %adw_ana_out_seq{l} = 32768*ones(1,4*Adwin.Default_parameters.max_step_ana)-2^31;
                     
-                    index = 1;
-                    
+                    disp('Start Data compression')
+                  
                     tic;
                     
-                    while ~isequal(cellfun(@(x) isequal(x,Inf),temp_cell{l}),ones(1,Adwin.Default_parameters.ana_crd_out_nbr))
+                    %%% new code %%%
+                    
+                    temp_cell = obj.ana_out_cell{l};
+                    
+                    for i=1:length(temp_cell)
                         
-                        % new code
+                        temp_cell{i} = cumsum(temp_cell{i});
                         
-                        [T,J] = sort(cellfun(@(x) x(1),temp_cell{l}),'ascend');
+                    end
+                    
+                    test_out = unique(cell2mat(temp_cell));
+                    
+                    adw_ana_time_seq{l} = zeros(size(test_out));
+                    
+                    adw_ana_out_seq{l} = 32768*ones(1,4*length(test_out))-2^31;
+                    
+                    test_bin_cell = cell(1,Adwin.Default_parameters.ana_crd_out_nbr);
+                    
+                    for j=1:Adwin.Default_parameters.ana_crd_out_nbr
                         
-                        tmp_cum = cumsum(temp_cell{l}{J(1)});
+                        test_bin_cell{j} = zeros(size(test_out));
                         
-                        if isequal(T(2),Inf)
+                    end
+                    
+                    index_array = ones(1,Adwin.Default_parameters.ana_crd_out_nbr);
+                    
+                    for i=1:length(test_out)
+                        
+                        %disp(['step ',num2str(i),' out of ',num2str(length(test_out))])
+                        
+                        for j=1:Adwin.Default_parameters.ana_crd_out_nbr
                             
-                            tmp_len = length(temp_cell{l}{J(1)})-1;
-                            
-                        else
-                            
-                            tmp_len = 2;
-                            
-                            while tmp_cum(tmp_len)<=temp_cell{l}{J(2)}(1)
+                            if temp_cell{j}(index_array(j))>test_out(i)
                                 
-                                tmp_len = tmp_len+1;
-                                
-                            end
-                            
-                            tmp_len = tmp_len-1;
-                            
-                        end
-                        
-                        adw_ana_time_seq{l}(index:index+(tmp_len-1))=temp_cell{l}{J(1)}(1:tmp_len);
-                        
-                        tmp_bin_cell = cell(1,Adwin.Default_parameters.ana_crd_out_nbr);
-                        
-                        for i=1:(Adwin.Default_parameters.ana_crd_out_nbr)
-                            
-                            if isequal(i,J(1))
-                                
-                                tmp_bin_cell{i} = temp_volt_cell{l}{i}(1:tmp_len);
-                                
-                                temp_cell{l}{i}=temp_cell{l}{i}((tmp_len+1):end);
-                                
-                                temp_volt_cell{l}{i}=temp_volt_cell{l}{i}((tmp_len+1):end);
+                                test_bin_cell{j}(i) = obj.ana_volt_cell{l}{j}(index_array(j));
                                 
                             else
                                 
-                                tmp_bin_cell{i}=temp_volt_cell{l}{i}(1)*ones(1,tmp_len);
+                                test_bin_cell{j}(i) = obj.ana_volt_cell{l}{j}(index_array(j));
                                 
-                                temp_cell{l}{i}(1) = temp_cell{l}{i}(1) - tmp_cum(tmp_len);
-                                
-                                if isequal(temp_cell{l}{i}(1),0)
-                                    
-                                    temp_cell{l}{i}=temp_cell{l}{i}(2:end);
-                                    
-                                    temp_volt_cell{l}{i}=temp_volt_cell{l}{i}(2:end);
-                                    
-                                end
+                                index_array(j) = index_array(j)+1;
                                 
                             end
-                            
                         end
                         
-                        for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
+                        for j=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
                             
-                            mask = tmp_bin_cell{2*i}>=2^15;
+                            mask = test_bin_cell{2*j}(i)>=2^15;
                             
-                            adw_ana_out_seq{l}(4*(index-1)+i:4:4*(index-1+tmp_len-1)+i) = tmp_bin_cell{2*i-1} + ...
-                                (tmp_bin_cell{2*i}*2^16).*~mask + (mod(tmp_bin_cell{2*i},2^15)*2^16-2^31).*mask;
+                            adw_ana_out_seq{l}(4*(i-1)+j) = test_bin_cell{2*j-1}(i) + ...
+                                (test_bin_cell{2*j}(i)*2^16).*~mask + (mod(test_bin_cell{2*j}(i),2^15)*2^16-2^31).*mask;
                             
                         end
-                        
-                        index=index+tmp_len;
                         
                     end
                     
+                    test_out(2:end) = test_out(2:end)-test_out(1:(end-1));
+                    
+                    adw_ana_time_seq{l}(1:length(test_out(1:(end-1)))) = test_out(1:(end-1));
+                    
+                    %%% end new code %%%%
+                    
+                    %%% old code part 2 %%%
+                    
+%                     index = 1;
+%                     
+%                     while ~isequal(cellfun(@(x) isequal(x,Inf),temp_cell{l}),ones(1,Adwin.Default_parameters.ana_crd_out_nbr))
+%                         
+%                         % new code
+%                         
+%                         [T,J] = sort(cellfun(@(x) x(1),temp_cell{l}),'ascend');
+%                         
+%                         tmp_cum = cumsum(temp_cell{l}{J(1)});
+%                         
+%                         if isequal(T(2),Inf)
+%                             
+%                             tmp_len = length(temp_cell{l}{J(1)})-1;
+%                             
+%                         else
+%                             
+%                             tmp_len = 2;
+%                             
+%                             while tmp_cum(tmp_len)<=temp_cell{l}{J(2)}(1)
+%                                 
+%                                 tmp_len = tmp_len+1;
+%                                 
+%                             end
+%                             
+%                             tmp_len = tmp_len-1;
+%                             
+%                         end
+%                         
+%                         adw_ana_time_seq{l}(index:index+(tmp_len-1))=temp_cell{l}{J(1)}(1:tmp_len);
+%                         
+%                         tmp_bin_cell = cell(1,Adwin.Default_parameters.ana_crd_out_nbr);
+%                         
+%                         for i=1:(Adwin.Default_parameters.ana_crd_out_nbr)
+%                             
+%                             if isequal(i,J(1))
+%                                 
+%                                 tmp_bin_cell{i} = temp_volt_cell{l}{i}(1:tmp_len);
+%                                 
+%                                 temp_cell{l}{i}=temp_cell{l}{i}((tmp_len+1):end);
+%                                 
+%                                 temp_volt_cell{l}{i}=temp_volt_cell{l}{i}((tmp_len+1):end);
+%                                 
+%                             else
+%                                 
+%                                 tmp_bin_cell{i}=temp_volt_cell{l}{i}(1)*ones(1,tmp_len);
+%                                 
+%                                 temp_cell{l}{i}(1) = temp_cell{l}{i}(1) - tmp_cum(tmp_len);
+%                                 
+%                                 if isequal(temp_cell{l}{i}(1),0)
+%                                     
+%                                     temp_cell{l}{i}=temp_cell{l}{i}(2:end);
+%                                     
+%                                     temp_volt_cell{l}{i}=temp_volt_cell{l}{i}(2:end);
+%                                     
+%                                 end
+%                                 
+%                             end
+%                             
+%                         end
+%                         
+%                         for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
+%                             
+%                             mask = tmp_bin_cell{2*i}>=2^15;
+%                             
+%                             adw_ana_out_seq{l}(4*(index-1)+i:4:4*(index-1+tmp_len-1)+i) = tmp_bin_cell{2*i-1} + ...
+%                                 (tmp_bin_cell{2*i}*2^16).*~mask + (mod(tmp_bin_cell{2*i},2^15)*2^16-2^31).*mask;
+%                             
+%                         end
+%                         
+%                         index=index+tmp_len;
+%                         
+%                     end
+%                     
+%                     for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
+%                         
+%                         if (temp_volt_cell{l}{2*i}(1)>=2^15)
+%                             
+%                             adw_ana_out_seq{l}(4*(index-1)+i) = temp_volt_cell{l}{2*i-1}(1)+mod(temp_volt_cell{l}{2*i}(1),2^15)*2^16-2^31;
+%                             
+%                         else
+%                             
+%                             adw_ana_out_seq{l}(4*(index-1)+i) = temp_volt_cell{l}{2*i-1}(1)+temp_volt_cell{l}{2*i}(1)*2^16;
+%                             
+%                         end
+%                         
+%                     end
+                    
+                    %%% end old code part 2 %%%
+                    
+                    disp('Data compression completed')                    
                     toc;
-                    
-                    for i=1:(Adwin.Default_parameters.ana_crd_out_nbr/2)
-                        
-                        if (temp_volt_cell{l}{2*i}(1)>=2^15)
-                            
-                            adw_ana_out_seq{l}(4*(index-1)+i) = temp_volt_cell{l}{2*i-1}(1)+mod(temp_volt_cell{l}{2*i}(1),2^15)*2^16-2^31;
-                            
-                        else
-                            
-                            adw_ana_out_seq{l}(4*(index-1)+i) = temp_volt_cell{l}{2*i-1}(1)+temp_volt_cell{l}{2*i}(1)*2^16;
-                            
-                        end
-                        
-                    end
                     
                     % display the 10 first terms of the tables sent to the adwin
                     
@@ -3414,19 +3525,23 @@ classdef Adwin < handle
 %                     fprintf('%d %d %d %d %d %d %d %d \n',adw_ana_out_seq{l}(1:8));
 %                     disp(['Analog output table sent to Adwin (9 to 16) - card ',num2str(l)])
 %                     fprintf('%d %d %d %d %d %d %d %d \n \n',adw_ana_out_seq{l}(9:16));
-                    
+
+                    disp('Start sending Data to Adwin')
+                    tic;
+
                     ret_val = SetData_Double(Adwin.Default_parameters.ana_data_time_array(l),int32(adw_ana_time_seq{l}),1);
                     
                     if ~isequal(ret_val,255)
                         
                         disp(['Set Data Analog Time ',num2str(l),' Success !'])
-                        disp(['Effective length of the data array : ',num2str(index)])
+                        disp(['Effective length of the data array : ',num2str(length(test_out))])
                         
                     else
                         
                         errnum = Get_Last_Error();
                         pErrText = Get_Last_Error_Text(errnum);
                         disp(['Error Set Data Analog Time ',num2str(l),' - ',pErrText])
+                        disp(['Length of the data : ',num2str(length(adw_ana_time_seq{l}))])
                         
                     end
                     
@@ -3444,11 +3559,295 @@ classdef Adwin < handle
                         
                     end
                     
+                    disp('Data to Adwin sent')
+                    toc;
+                    
                 end
                 
                 % Reset the seq_changed tag
                 
                 obj.seq_changed = 0;
+                
+            end
+            
+            %%% Update the tabor sequence if rf sequence has changed
+            
+            for i=1:length(obj.rf_timings_array)
+                
+                obj.rf_timings_array(i).postset_freq_formula;
+                
+                obj.rf_timings_array(i).postset_timing_formula;
+                
+            end
+            
+            if obj.rf_seq_changed
+                
+                % Load waves frequencies
+                
+                load([Adwin.Default_parameters.data_root_path,'tabor_waves_informations']); % contains two arrays 'tabor_waves_freq' (frequency of each wave) and 'tabor_waves_nbr' (number of points in each wave)
+                % and a number the 'sample_rate'
+                
+                % Initialize Waves index array
+                
+                tabor_waves_index_array = [];
+                
+                % Initialize Waves loops array
+                
+                tabor_waves_loops_array = [];
+                
+                for i=1:(length(obj.rf_timings_array)-1)
+                    
+                    switch obj.rf_timings_array(i).behaviour
+                        
+                        case 'C'
+                            
+                            nbr_pts_waves = tabor_waves_nbr;
+                            
+                            nu_in = obj.rf_timings_array(i).frequency;
+                            
+                            timing = obj.rf_timings_array(i).timing*1e-3;
+                            
+                            freq_waves = tabor_waves_freq;
+                            
+                            % On cherche la fréquence la plus proche de nu_in dans freq_waves
+                            
+                            [mini,index] = min(abs(freq_waves-nu_in));
+                            
+                            loops = round (timing/nbr_pts_waves(index)*sample_rate); % Nombre de répétitions de la Wave
+                            
+                            % Update tabor sequence informations
+                            
+                            tabor_waves_index_array = [tabor_waves_index_array,index];
+                            
+                            tabor_waves_loops_array = [tabor_waves_loops_array,loops];
+                            
+                        case 'R'
+                            
+                            nbr_pts_waves = tabor_waves_nbr;
+                            
+                            nu_in = obj.rf_timings_array(i).frequency;
+                            nu_fin = obj.rf_timings_array(i+1).frequency;
+                            
+                            timing = obj.rf_timings_array(i).timing*1e-3;
+                            
+                            freq_waves = tabor_waves_freq;
+                            
+                            if nu_in<nu_fin
+                                
+                                nu_1 = nu_in;
+                                nu_2 = nu_fin;
+                                
+                            else
+                                nu_1 = nu_fin;
+                                nu_2 = nu_in;
+
+                            end
+                            
+                            freq_waves_used = freq_waves((freq_waves>=nu_1) & (freq_waves<=nu_2)); % On récupère les fréquences entre nu_in et nu_fin pour les Waves dont on dispose
+                            
+                            Index = find((freq_waves>=nu_1) & (freq_waves<=nu_2)); % On récupère les indices correspondant dans le tableau des fréquences
+                            
+                            nu_inf = max (freq_waves((freq_waves<=nu_1))); % Fréquence juste inférieure à min(nu_in, nu_fin)dans le tableau des fréquences
+                            
+                            ind_inf = find(freq_waves == nu_inf);
+                            
+                            nu_sup = min (freq_waves((freq_waves>=nu_2))); %Fréquence juste supérieure à max(nu_in, nu_fin) dans le tableau des fréquences
+                            
+                            ind_sup = find(freq_waves == nu_sup);
+                            
+                            % On détermine si on doit utiliser nu_inf et on le rajoute au tableau des fréquences utilisées si c'est la cas
+                            
+                            if (nu_1-nu_inf) < (min(freq_waves_used)-nu_1)
+                                
+                                freq_waves_used = [nu_inf,freq_waves_used];
+                                
+                                Index = [ind_inf,Index];
+                                
+                            end
+                            
+                            % On détermine si on doit utiliser nu_sup et on le rajoute au tableau des fréquences utilisées si c'est la cas
+
+                            if (nu_sup-nu_2) < (nu_2-max(freq_waves_used))
+                                
+                                freq_waves_used = [freq_waves_used,nu_sup];
+                                
+                                Index = [Index,ind_sup];
+                                
+                            end
+                            
+                            % On détermine les temps pour lesquels la fonction de la rampe de fréquence est égale aux fréquences des Waves utilisées
+                            
+                            times_vec= zeros(size(freq_waves_used));
+                            
+                            for j = 1:length(freq_waves_used)
+                                
+                                diff_freq = @(t) nu_in+(nu_fin-nu_in)*t/timing-freq_waves_used(j);
+                                
+                                times_vec(j) = fsolve(diff_freq,timing/2);
+                                
+                            end
+                            
+                            % On trie les tableaux de temps et des nombres de points des Waves dans le bon ordre
+                            
+                            [times_vec_sorted,Index2] = sort(times_vec);
+                            
+                            Seq_nbr_pts_waves = nbr_pts_waves(Index(Index2));
+                            
+                            % On détermine le nombre de fois où il faut répéter chacune des Waves utilisées
+                            
+                            loops = zeros(size(freq_waves_used));
+                            
+                            loops(1) =   round((times_vec_sorted(1)+(times_vec_sorted(2)-times_vec_sorted(1))/2)/Seq_nbr_pts_waves(1)*sample_rate);
+                            
+                            if length(freq_waves_used)>2
+                                
+                                loops(2:(length(freq_waves_used)-1)) = round (((times_vec_sorted(2:(length(freq_waves_used)-1))-times_vec_sorted(1:(length(freq_waves_used)-2)))/2 +(times_vec_sorted(3:(length(freq_waves_used)))-times_vec_sorted(2:(length(freq_waves_used)-1)))/2)./Seq_nbr_pts_waves(2:(length(freq_waves_used)-1))*sample_rate );
+                                
+                            end
+                            
+                            loops(length(freq_waves_used)) =  round((timing - times_vec_sorted(length(freq_waves_used))+(times_vec_sorted(length(freq_waves_used))-times_vec_sorted(length(freq_waves_used)-1))/2)/Seq_nbr_pts_waves(length(freq_waves_used))*sample_rate);
+                            
+                            % Update tabor sequence informations
+                            
+                            tabor_waves_index_array = [tabor_waves_index_array,Index(Index2)];
+                            
+                            tabor_waves_loops_array = [tabor_waves_loops_array,loops];
+                            
+                        case 'S'
+                            
+                            nbr_pts_waves = tabor_waves_nbr;
+                            
+                            nu_in = obj.rf_timings_array(i).frequency;
+                            nu_fin = obj.rf_timings_array(i+1).frequency;
+                            
+                            freq_waves = tabor_waves_freq;
+                            
+                            timing = obj.rf_timings_array(i).timing*1e-3;
+                            
+                            fun = eval(['@(t) Adwin.Functions.',obj.rf_timings_array(i).behaviour_function,'(t)']);
+                            
+                            if nu_in<nu_fin
+                                
+                                nu_1=nu_in;
+                                nu_2=nu_fin;
+                                
+                            else
+                                
+                                nu_1=nu_fin;
+                                nu_2=nu_in;
+                                
+                            end
+                            
+                            % On récupère les fréquences, les pointeurs des Waves et leurs nombres de points qu'on va utiliser
+                            
+                            Index = find(((freq_waves>=nu_1) & (freq_waves<=nu_2)));
+                            
+                            freq_waves_used = freq_waves((freq_waves>=nu_1) & (freq_waves<=nu_2));
+                            
+                            nu_inf = max (freq_waves((freq_waves<=nu_1)));
+                            
+                            ind_inf = find(freq_waves == nu_inf);
+                            
+                            nu_sup = min (freq_waves((freq_waves>=nu_2)));
+                            
+                            ind_sup = find(freq_waves == nu_sup);
+                            
+                            if (nu_1-nu_inf) < (min(freq_waves_used)-nu_1)
+                                
+                                freq_waves_used = [nu_inf,freq_waves_used];
+                                
+                                Index = [ind_inf,Index];
+                                
+                                
+                            end
+                            
+                            
+                            if (nu_sup-nu_2) < (nu_2-max(freq_waves_used))
+                                
+                                freq_waves_used = [freq_waves_used,nu_sup];
+                                
+                                Index = [Index, ind_sup];
+                                
+                            end
+                            
+                            
+                            % On trie les fréquences dans l'ordre croissant
+                            
+                            [freq_waves_sorted, Index2] = sort(freq_waves_used);
+                            
+                            % On trie les fréquences dans l'ordre décroissant si nu_fin<nu_in
+                            
+                            if nu_fin < nu_in
+                                
+                                freq_waves_sorted = fliplr(freq_waves_sorted);
+                                
+                                Index2 = fliplr(Index2);
+
+                            end
+                            
+                            Seq_nbr_pts_waves = nbr_pts_waves(Index(Index2));
+                            
+                            % On détermine les temps pour lesquels on doit passer d'une Wave à une autre
+                            
+                            times_int = zeros(1,length(freq_waves_sorted)-1);
+                            
+                            for j = 1:(length(freq_waves_sorted)-1)
+                                
+                                diff_freq = @(t)  fun(t)-(freq_waves_sorted(j)+freq_waves_sorted(j+1))/2;
+                                
+                                times_int (j) = timing * fsolve(diff_freq, 0.5);
+                                
+                            end
+
+                            % On détermine le nombre de fois où il faut répéter chacune des Waves utilisées
+                            
+                            loops = zeros(size(freq_waves_sorted));
+                            
+                            loops(1)= round(times_int(1)/Seq_nbr_pts_waves(1)*sample_rate);
+                            
+                            loops(2:(length(freq_waves_sorted)-1))= round((times_int(2:(length(freq_waves_sorted)-1))- times_int(1:(length(freq_waves_sorted)-2)))./Seq_nbr_pts_waves(2:(length(freq_waves_sorted)-1))*sample_rate );
+                            
+                            loops(length(freq_waves_sorted)) =  round((timing-times_int(length(freq_waves_sorted)-1))/Seq_nbr_pts_waves(length(freq_waves_sorted))*sample_rate);
+                            
+                            % Update tabor sequence informations
+                            
+                            tabor_waves_index_array = [tabor_waves_index_array,Index(Index2)];
+                            
+                            tabor_waves_loops_array = [tabor_waves_loops_array,loops];
+                        
+                    end
+
+                end
+                
+                save([Adwin.Default_parameters.tabor_data_path,'tabor_data'],'tabor_waves_index_array','tabor_waves_loops_array');
+                
+                obj.net.send_message('BEC009','Tabor_sequence-changed');
+                
+                obj.rf_seq_changed = 0;
+                
+            end
+            
+            %%% Update the SMC100A sequence if rf sequence has changed
+            
+            obj.mw_params.postset_start_freq_formula;
+            
+            obj.mw_params.postset_stop_freq_formula;
+            
+            obj.mw_params.postset_sweep_duration_formula;
+            
+            obj.mw_params.postset_sweep_points_formula;
+            
+            obj.mw_params.postset_level_formula;
+            
+            if obj.mw_seq_changed
+                
+                obj.net.send_message('BEC009',['SMC100A_sequence-start_freq-',num2str(obj.mw_params.start_freq*1e6),...
+                    '-stop_freq-',num2str(obj.mw_params.stop_freq*1e6),...
+                    '-sw_dur-',num2str(obj.mw_params.sweep_duration/1000),...
+                    '-sw_pts-',num2str(obj.mw_params.sweep_points),...
+                    '-level-',num2str(obj.mw_params.level)]);
+                
+                obj.mw_seq_changed = 0; 
                 
             end
             
@@ -3525,7 +3924,7 @@ classdef Adwin < handle
             
             % send message to empty camera buffer
             
-            obj.net.send_message('BEC009','stop-seq');
+            %obj.net.send_message('BEC009','stop-seq');
             
             %%% re-initialize adwin outputs
             
@@ -3593,11 +3992,13 @@ classdef Adwin < handle
                 copyfile([path,'\dependent_parameters_script.m'],[Adwin.Default_parameters.root_path,'sequence_manager\dependent_parameters_script.m']);
                 copyfile([path,'\auto_script.m'],[Adwin.Default_parameters.root_path,'sequence_manager\auto_script.m']);
                 
-                if exist([path,'\Default_parameters.m'],'file')
-                    
-                    copyfile([path,'\Default_parameters.m'],[Adwin.Default_parameters.root_path,'sequence_manager\+Adwin\Default_parameters.m']);
-                    
-                end
+                % Don't reload the Default_parameters file, just save it
+                % !!!
+%                 if exist([path,'\Default_parameters.m'],'file')
+%                     
+%                     copyfile([path,'\Default_parameters.m'],[Adwin.Default_parameters.root_path,'sequence_manager\+Adwin\Default_parameters.m']);
+%                     
+%                 end
                 
             end
             
@@ -4384,6 +4785,642 @@ classdef Adwin < handle
                 end
                 
             end
+            
+        end
+        
+        function amg_but2_8_clb(obj,~,~)
+            
+            if ~isempty(obj.srf)&&ishandle(obj.srf.h)
+                
+                set(obj.srf.h,'Visible','off');
+                set(obj.srf.h,'Visible','on');
+                
+            else
+                
+                obj.srf.h = figure(...
+                    'Name'                ,'set RF & MW' ...
+                    ,'NumberTitle'        ,'off' ...
+                    ,'Position'           ,[8 600 1200 300] ... %,'MenuBar'     ,'none'...
+                    ,'CloseRequestFcn'    ,@obj.srf_closereq ...
+                    );
+                
+                obj.srf.hsp1 = uipanel(...
+                    'Parent'              ,obj.srf.h ...
+                    ,'Title'              ,'set RF' ...
+                    ,'TitlePosition'      ,'lefttop' ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[0.0025 0.51 0.995 0.48] ...
+                    );
+                
+                % RF timings sequence
+                
+                c_wth = 0.3;
+                r_wth = 0.2;
+                c_ofs = 0.01;
+                r_ofs = 0.4;
+                
+                obj.srf.txt1 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp1 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'RF timings sequence' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                if isempty(obj.rf_timings_array)
+                    
+                    obj.rf_timings_array = Adwin.RFtiming;
+                    
+                    obj.rf_timings_array.parent_adwin = obj;
+                    
+                    obj.rf_timings_array.rf_timing_nbr = 1;
+                    
+                    obj.rf_timings_array.timing_formula = 'Inf';
+                    
+                    obj.rf_timings_array.freq_formula = '0';
+                    
+                    obj.rf_timings_array.behaviour = 'C';
+                    
+                end
+                
+                
+                for j=1:length(obj.rf_timings_array)
+                    
+                    temp = obj.rf_timings_array(j);
+                    
+                    % RF  hsp1_j panels geometry
+                    
+                    c_start_ofs = 0.15;
+                    c_wth = 0.06;
+                    r_wth = 0.8;
+                    c_ofs = 0.0025;
+                    r_ofs = 0.1;
+                    
+                    eval(['obj.srf.hsp1_',num2str(j),' = uipanel(', ...
+                        '''Parent''              ,obj.srf.hsp1', ...
+                        ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                        ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                        ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                        ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                        ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                        ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                        ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                        ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                        ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                        ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                        ',''Position''           ,[c_start_ofs+(j-1)*(c_wth+c_ofs) r_ofs c_wth r_wth]', ...
+                        ');']);
+                    
+                    % RF timings edit hsp1_j_1 panels geometry
+                    
+                    c_wth = 0.595;
+                    r_wth = 0.495;
+                    c_ofs = 0.0025;
+                    r_ofs = 0.5025;
+                    
+                    eval(['obj.srf.hsp1_',num2str(j),'_1 = uipanel(', ...
+                        '''Parent''              ,obj.srf.hsp1_',num2str(j), ...
+                        ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                        ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                        ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                        ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                        ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                        ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                        ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                        ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                        ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                        ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                        ',''Position''           ,[c_ofs r_ofs c_wth r_wth]', ...
+                        ');']);
+                    
+                    % RF Edit timings geometry
+                    
+                    c_wth = 0.95;
+                    r_wth = 0.8;
+                    c_ofs = 0.05;
+                    r_ofs = 0.05;
+                    
+                    eval(['obj.srf.txt1_',num2str(j),' = uicontrol(', ...
+                        '''Parent''               ,obj.srf.hsp1_',num2str(j),'_1' ...
+                        ',''Style''               ,''text''', ...
+                        ',''String''              ,obj.rf_timings_array(',num2str(j),').timing_formula', ...
+                        ',''Units''               ,Adwin.Default_parameters.Text_Units', ...
+                        ',''Position''            ,[c_ofs r_ofs c_wth r_wth]',  ...
+                        ',''ButtonDownFcn''       ,@temp.rf_timing_btd_fcn', ...
+                        ',''Tag''                 ,','''tag_',num2str(j),'''', ...
+                        ');']);
+                    
+                    % RF but_j behaviour geometry
+                    
+                    c_wth = 0.395;
+                    r_wth = 0.495;
+                    c_ofs = 0.6025;
+                    r_ofs = 0.5025;
+                    
+                    eval(['obj.srf.but_',num2str(j),' = uicontrol(', ...
+                        '''Parent''              ,obj.srf.hsp1_',num2str(j), ...
+                        ',''Style''               ,''pushbutton''', ...
+                        ',''String''              ,obj.rf_timings_array(',num2str(j),').behaviour', ...
+                        ',''FontName''            ,Adwin.Default_parameters.Pushbutton_FontName', ...
+                        ',''FontSize''            ,Adwin.Default_parameters.Pushbutton_FontSize', ...
+                        ',''FontUnits''           ,Adwin.Default_parameters.Pushbutton_FontUnits', ...
+                        ',''FontWeight''          ,Adwin.Default_parameters.Pushbutton_FontWeight', ...
+                        ',''Units''               ,Adwin.Default_parameters.Pushbutton_Units', ...
+                        ',''Position''           ,[c_ofs r_ofs c_wth r_wth]', ...
+                        ',''Callback''           ,@temp.rf_beh_clb', ...
+                        ',''Tag''                 ,','''tag_',num2str(j),'''', ...
+                        ');']);
+                    
+                    % RF frequency hsp1_j_2 panels geometry
+                    
+                    c_wth = 0.995;
+                    r_wth = 0.495;
+                    c_ofs = 0.0025;
+                    r_ofs = 0.0025;
+                    
+                    eval(['obj.srf.hsp1_',num2str(j),'_2 = uipanel(', ...
+                        '''Parent''              ,obj.srf.hsp1_',num2str(j), ...
+                        ',''BackgroundColor''    ,Adwin.Default_parameters.Panel_BackgroundColor', ...
+                        ',''ForegroundColor''    ,Adwin.Default_parameters.Panel_ForegroundColor', ...
+                        ',''HighlightColor''     ,Adwin.Default_parameters.Panel_HighlightColor', ...
+                        ',''ShadowColor''        ,Adwin.Default_parameters.Panel_ShadowColor', ...
+                        ',''FontName''           ,Adwin.Default_parameters.Panel_FontName', ...
+                        ',''FontSize''           ,Adwin.Default_parameters.Panel_FontSize', ...
+                        ',''FontUnits''          ,Adwin.Default_parameters.Panel_FontUnits', ...
+                        ',''FontWeight''         ,Adwin.Default_parameters.Panel_FontWeight', ...
+                        ',''SelectionHighlight'' ,Adwin.Default_parameters.Panel_SelectionHighlight', ...
+                        ',''Units''              ,Adwin.Default_parameters.Panel_Units', ...
+                        ',''Position''           ,[c_ofs r_ofs c_wth r_wth]', ...
+                        ');']);
+                    
+                    % RF frequency geometry
+                    
+                    c_wth = 0.95;
+                    r_wth = 0.8;
+                    c_ofs = 0.05;
+                    r_ofs = 0.05;
+                    
+                    eval(['obj.srf.txt2_',num2str(j),' = uicontrol(', ...
+                        '''Parent''               ,obj.srf.hsp1_',num2str(j),'_2' ...
+                        ',''Style''               ,''text''', ...
+                        ',''String''              ,obj.rf_timings_array(',num2str(j),').freq_formula', ...
+                        ',''Units''               ,Adwin.Default_parameters.Text_Units', ...
+                        ',''Position''            ,[c_ofs r_ofs c_wth r_wth]',  ...
+                        ',''ButtonDownFcn''       ,@temp.rf_frq_btd_fcn', ...
+                        ',''Tag''                 ,','''tag_',num2str(j),'''', ...
+                        ');']);
+                    
+                end
+                
+                % Set MW parameters
+                
+                if isempty(obj.mw_params)
+                    
+                    obj.mw_params = Adwin.MWparams;
+                    
+                    obj.mw_params.parent_adwin = obj;
+                    
+                    % set default value
+                    
+                    obj.mw_params.start_freq_formula = num2str(Adwin.Default_parameters.mw_start_freq);
+                    obj.mw_params.stop_freq_formula = num2str(Adwin.Default_parameters.mw_stop_freq);
+                    
+                    obj.mw_params.sweep_duration_formula = num2str(Adwin.Default_parameters.mw_sweep_duration);
+                    obj.mw_params.sweep_points_formula = num2str(Adwin.Default_parameters.mw_sweep_points);
+                    
+                    obj.mw_params.level_formula = num2str(Adwin.Default_parameters.mw_level);
+                    
+                end
+                
+                obj.srf.hsp2 = uipanel(...
+                    'Parent'              ,obj.srf.h ...
+                    ,'Title'              ,'set MW' ...
+                    ,'TitlePosition'      ,'lefttop' ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[0.0025 0.01 0.995 0.48] ...
+                    );
+                
+                % Sweep Start Frequency text geometry
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.02;
+                r_ofs = 0.02+4*(r_wth+0.05);
+                
+                obj.srf.txt3 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'Sweep Start Frequency' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 0.05;
+                r_wth = 0.15;
+                c_ofs = 0.125;
+                r_ofs = 0.04+4*(r_wth+0.05);
+                
+                obj.srf.hsp2_1 = uipanel(...
+                    'Parent'              ,obj.srf.hsp2 ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 1;
+                r_wth = 1;
+                c_ofs = 0;
+                r_ofs = 0;
+                
+                temp = obj.mw_params;
+                
+                obj.srf.txt4 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2_1 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,obj.mw_params.start_freq_formula ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,Adwin.Default_parameters.Text_HorizontalAlignment ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'ButtonDownFcn'        ,@temp.sweep_start_freq_btd_fcn ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                clear temp
+
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.185;
+                r_ofs = 0.02+4*(r_wth+0.05);
+                
+                obj.srf.txt5 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'MHz' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                % Sweep Stop Frequency text geometry
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.02;
+                r_ofs = 0.02+3*(r_wth+0.05);
+                
+                obj.srf.txt6 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'Sweep Stop Frequency' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 0.05;
+                r_wth = 0.15;
+                c_ofs = 0.125;
+                r_ofs = 0.04+3*(r_wth+0.05);
+                
+                obj.srf.hsp2_2 = uipanel(...
+                    'Parent'              ,obj.srf.hsp2 ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 1;
+                r_wth = 1;
+                c_ofs = 0;
+                r_ofs = 0;
+                
+                temp = obj.mw_params;
+                
+                obj.srf.txt7 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2_2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,obj.mw_params.stop_freq_formula ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,Adwin.Default_parameters.Text_HorizontalAlignment ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'ButtonDownFcn'        ,@temp.sweep_stop_freq_btd_fcn ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                clear temp;
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.185;
+                r_ofs = 0.02+3*(r_wth+0.05);
+                
+                obj.srf.txt8 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'MHz' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                % Sweep Duration text geometry
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.02;
+                r_ofs = 0.02+2*(r_wth+0.05);
+                
+                obj.srf.txt9 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'Sweep Duration' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 0.05;
+                r_wth = 0.15;
+                c_ofs = 0.125;
+                r_ofs = 0.04+2*(r_wth+0.05);
+                
+                obj.srf.hsp2_3 = uipanel(...
+                    'Parent'              ,obj.srf.hsp2 ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 1;
+                r_wth = 1;
+                c_ofs = 0;
+                r_ofs = 0;
+                
+                temp = obj.mw_params;
+                
+                obj.srf.txt10 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2_3 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,obj.mw_params.sweep_duration_formula ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,Adwin.Default_parameters.Text_HorizontalAlignment ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'ButtonDownFcn'        ,@temp.sweep_duration_btd_fcn ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                clear temp
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.185;
+                r_ofs = 0.02+2*(r_wth+0.05);
+                
+                obj.srf.txt11 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'ms' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                % Sweep Points text geometry
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.02;
+                r_ofs = 0.02+1*(r_wth+0.05);
+                
+                obj.srf.txt12 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'Sweep Points' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 0.05;
+                r_wth = 0.15;
+                c_ofs = 0.125;
+                r_ofs = 0.04+1*(r_wth+0.05);
+                
+                obj.srf.hsp2_4 = uipanel(...
+                    'Parent'              ,obj.srf.hsp2 ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 1;
+                r_wth = 1;
+                c_ofs = 0;
+                r_ofs = 0;
+                
+                temp = obj.mw_params;
+                
+                obj.srf.txt13 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2_4 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,obj.mw_params.sweep_points_formula ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,Adwin.Default_parameters.Text_HorizontalAlignment ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'ButtonDownFcn'        ,@temp.sweep_points_btd_fcn ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                clear temp
+                
+                % Sweep MW Level text geometry
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.02;
+                r_ofs = 0.02+0*(r_wth+0.05);
+                
+                obj.srf.txt14 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'Sweep MW Level' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 0.05;
+                r_wth = 0.15;
+                c_ofs = 0.125;
+                r_ofs = 0.04+0*(r_wth+0.05);
+                
+                obj.srf.hsp2_5 = uipanel(...
+                    'Parent'              ,obj.srf.hsp2 ...
+                    ,'BackgroundColor'    ,Adwin.Default_parameters.Panel_BackgroundColor ...
+                    ,'ForegroundColor'    ,Adwin.Default_parameters.Panel_ForegroundColor ...
+                    ,'HighlightColor'     ,Adwin.Default_parameters.Panel_HighlightColor ...
+                    ,'ShadowColor'        ,Adwin.Default_parameters.Panel_ShadowColor ...
+                    ,'FontName'           ,Adwin.Default_parameters.Panel_FontName ...
+                    ,'FontSize'           ,Adwin.Default_parameters.Panel_FontSize ...
+                    ,'FontUnits'          ,Adwin.Default_parameters.Panel_FontUnits ...
+                    ,'FontWeight'         ,Adwin.Default_parameters.Panel_FontWeight ...
+                    ,'SelectionHighlight' ,Adwin.Default_parameters.Panel_SelectionHighlight ...
+                    ,'Units'              ,Adwin.Default_parameters.Panel_Units ...
+                    ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                c_wth = 1;
+                r_wth = 1;
+                c_ofs = 0;
+                r_ofs = 0;
+                
+                temp = obj.mw_params;
+                
+                obj.srf.txt15 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2_5 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,obj.mw_params.level_formula ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,Adwin.Default_parameters.Text_FontWeight ...
+                    ,'HorizontalAlignment'  ,Adwin.Default_parameters.Text_HorizontalAlignment ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'ButtonDownFcn'        ,@temp.mw_level_btd_fcn ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                clear temp
+                
+                c_wth = 0.12;
+                r_wth = 0.15;
+                c_ofs = 0.185;
+                r_ofs = 0.02+0*(r_wth+0.05);
+                
+                obj.srf.txt16 = uicontrol(...
+                    'Parent'                ,obj.srf.hsp2 ...
+                    ,'Style'                ,'text' ...
+                    ,'String'               ,'dBm' ...
+                    ,'FontName'             ,Adwin.Default_parameters.Text_FontName ...
+                    ,'FontSize'             ,Adwin.Default_parameters.Text_FontSize ...
+                    ,'FontUnits'            ,Adwin.Default_parameters.Text_FontUnits ...
+                    ,'FontWeight'           ,'normal' ...
+                    ,'HorizontalAlignment'  ,'left' ...
+                    ,'Units'                ,Adwin.Default_parameters.Text_Units ...
+                    ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                    );
+                
+                
+                
+            end
+            
+        end
+        
+        function srf_closereq(obj,~,~)
+           
+            delete(obj.srf.h)
+            
+            obj.srf = [];
             
         end
         
@@ -5226,6 +6263,28 @@ classdef Adwin < handle
                 
                 set(obj.amg.edt5_1_1,'Enable','on')
                 
+            end
+            
+        end
+        
+        function execute(obj,name,message)
+            
+            switch name
+                
+                case 'BEC009'
+                    
+                    message = strcat(message,'');
+                    
+                    str_cell = strsplit(message,'-');
+                    
+                    switch str_cell{1}
+                        
+                        case 'Tabor_Waves'
+                            
+                            obj.rf_seq_changed = 1;
+                            
+                    end
+                    
             end
             
         end
